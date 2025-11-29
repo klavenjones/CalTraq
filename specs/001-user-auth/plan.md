@@ -15,26 +15,15 @@ account records linked to future tracking features.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
 **Language/Version**: TypeScript, Expo React Native (current stable SDK)  
-**Primary Dependencies**: Expo, React Native, Expo Router, Clerk (authentication), Convex (backend
-data persistence), React Native Reusables, Nativewind  
+**Primary Dependencies**: Expo, React Native, Expo Router, Clerk (authentication), Convex (backend data persistence), React Native Reusables, Nativewind  
 **Storage**: Convex database for user accounts and auth-linked app data keyed by Clerk user IDs  
-**Testing**: Jest and React Native Testing Library for unit and integration tests; Detox for
-high-risk end-to-end authentication flows  
+**Testing**: Jest and React Native Testing Library for unit and integration tests; Detox for high-risk end-to-end authentication flows  
 **Target Platform**: iOS, Android, and Web via Expo managed workflow  
-**Project Type**: Mobile app (single Expo project)  
-**Performance Goals**: Authentication flows respond in under 3 seconds under normal conditions and
-do not introduce noticeable UI jank during navigation or loading  
-**Constraints**: Online-first experience; offline login is not supported in v1; security and
-privacy for health-related data are prioritized  
-**Scale/Scope**: Designed for at least tens of thousands of user accounts with moderate concurrent
-usage typical of consumer mobile apps
+**Project Type**: Mobile app (single Expo project, Expo Router-based navigation)  
+**Performance Goals**: Authentication flows respond in under 3 seconds under normal operating conditions and do not introduce noticeable UI jank during navigation or loading  
+**Constraints**: Online-first experience; offline login is not supported in v1; security and privacy for health-related data are prioritized  
+**Scale/Scope**: Designed for at least tens of thousands of user accounts with moderate concurrent usage typical of consumer mobile apps
 
 ## Constitution Check
 
@@ -78,57 +67,58 @@ specs/001-user-auth/
 
 ### Source Code (repository root)
 
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+app/
+├── \_layout.tsx # Root layout and providers (including Clerk context)
+├── +html.tsx # Expo Router HTML document for web
+├── +not-found.tsx # Not-found route
+├── index.tsx # Main app entry screen (gated by auth state)
+└── (auth)/ # Authentication routes
+├── sign-in.tsx
+├── forgot-password.tsx
+├── reset-password.tsx
+└── sign-up/
+├── \_layout.tsx
+├── index.tsx
+└── verify-email.tsx
 
-```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+components/
+├── sign-in-form.tsx
+├── sign-up-form.tsx
+├── forgot-password-form.tsx
+├── reset-password-form.tsx
+├── verify-email-form.tsx
+├── social-connections.tsx
+├── user-menu.tsx
+└── ui/ # React Native Reusables-based primitives
+├── button.tsx
+├── input.tsx
+├── card.tsx
+├── text.tsx
+└── ...
+
+lib/
+├── clerk/
+│ └── auth.ts # Clerk helpers for current user/session
+├── convex/
+│ └── auth.ts # Convex helpers for auth-related operations
+└── theme.ts # Theming helpers (Nativewind, color schemes)
+
+convex/
+└── schema.ts # Convex schema including UserAccount and RecoveryRequest
 
 tests/
-├── contract/
-├── integration/
-└── unit/
+├── auth/
+│ ├── sign-up.test.tsx
+│ ├── sign-in.test.tsx
+│ └── recovery.test.tsx
+└── e2e/
+└── auth-flows.test.ts # End-to-end auth flows (sign-up, sign-in, recovery)**Structure Decision**:
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
-```
-
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+- **Primary app**: Expo Router single project under `app/`
+- **Auth UI**: `app/(auth)/` + `components/*-form.tsx`
+- **Backend integration**: `convex/` + `lib/clerk/`, `lib/convex/`
+- **Tests**: `tests/auth/` (unit/integration) and `tests/e2e/` (end-to-end)
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation                  | Why Needed         | Simpler Alternative Rejected Because |
-| -------------------------- | ------------------ | ------------------------------------ |
-| [e.g., 4th project]        | [current need]     | [why 3 projects insufficient]        |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient]  |
+No additional architectural complexity beyond the standard Expo + Clerk + Convex stack is planned for this feature, and no constitution violations are expected. If a future iteration requires an exception, it will be documented here with justification.

@@ -11,6 +11,18 @@
 
 - Q: Which authentication methods are in scope for the first release? → A: Email/password plus Apple/Google sign-in
 
+## Constitution Check
+
+This feature has been designed to comply with the Caltraq Constitution:
+
+- **Principle 1 – Typed, Functional, Modular Expo React Native Code**: All authentication screens and helpers will be implemented as typed functional components and utilities in TypeScript, with clear separation of concerns and no classes.
+- **Principle 2 – UI, Styling, and Layout with React Native Reusables**: Sign-in, sign-up, password recovery, and account-related UI will use React Native Reusables components styled via Nativewind, supporting dark mode and respecting safe areas.
+- **Principle 3 – State Management, Data Fetching, and Performance**: Authentication state will be centralized via Clerk and shared helpers; Convex calls will be structured to avoid unnecessary re-renders or duplicate network requests.
+- **Principle 4 – Navigation, Workflow, and Platform Coverage**: Auth routes will be implemented with Expo Router, with guarded access to protected screens and consistent behavior across iOS, Android, and Web.
+- **Principle 5 – Reliability, Testing, Error Handling, Security, and i18n**: Critical auth flows (sign-up, sign-in, password reset, SSO) will have automated tests; errors will be handled with clear user-facing messages; communication with Clerk and Convex will occur over HTTPS, and sensitive data will be stored using secure mechanisms.
+
+No intentional constitution violations are planned for this feature. Any deviation MUST be documented in the implementation plan and pull requests.
+
 ## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Create and access a Caltraq account (Priority: P1)
@@ -35,6 +47,8 @@ and associated with the same account.
    logs, and goals.
 3. **Given** a user who has completed account creation, **When** they close and reopen the app,
    **Then** they can access their account again without re-creating it.
+4. **Given** a user who begins account creation but closes the app or navigates away before completion, **When** they later return to the sign-up flow with the same identifier, **Then** the system either resumes the flow safely or starts a clean sign-up without creating duplicate or broken account records.
+5. **Given** a previously abandoned sign-up attempt, **When** the system cleans up related temporary records, **Then** no orphaned `UserAccount` or `RecoveryRequest` documents remain that could confuse future sign-ups.
 
 ---
 
@@ -84,21 +98,25 @@ previous data remains intact.
 2. **Given** a user who completes the recovery flow and sets a new password, **When** they sign
    in with the updated credentials, **Then** they regain full access to their existing Caltraq
    account with all prior settings, logs, and goals intact.
+3. **Given** a user who enters an identifier that is not associated with any Caltraq account during the recovery flow, **When** they submit the recovery request, **Then** the system responds with a neutral message (for example, “If an account exists for this email, we’ve sent instructions”) and does not indicate whether the identifier is registered.
 
 ---
 
 ### Edge Cases
 
 - What happens when a user attempts to create an account with an identifier (such as email) that
-  is already associated with an existing Caltraq account?
+  is already associated with an existing Caltraq account? **→ Addressed by FR-002 and related
+  sign-up validation tests.**
 - How does the system handle repeated failed sign-in attempts (for example, multiple wrong
-  passwords in a row) without locking out legitimate users permanently?
+  passwords in a row) without locking out legitimate users permanently? **→ Addressed by FR-008,
+  lockout UX in User Story 2, and T020/T039/T040 tests.**
 - What happens when a user tries to access account-only screens without being signed in (for
-  example, deep link or bookmarked URL)?
+  example, deep link or bookmarked URL)? **→ Addressed by FR-010 and route guards in User Story 2.**
 - How does the system behave if a user begins account creation but abandons the process before
-  completion?
+  completion? **→ Addressed by FR-011 and abandoned sign-up tasks/tests (T031–T033).**
 - What happens when a user attempts to use the recovery flow with an identifier that is not
-  associated with any Caltraq account?
+  associated with any Caltraq account? **→ Addressed by FR-012 and neutral recovery messaging
+  tasks/tests (T034–T035).**
 
 ## Requirements _(mandatory)_
 
@@ -114,7 +132,7 @@ previous data remains intact.
   third-party sign-in options (Apple and Google).
 - **FR-004**: The system MUST maintain a persistent association between each account and that
   user’s Katch–McArdle configuration, historical logs, and goals so that these data are available
-  after signing out, closing the app, or switching devices.
+  after signing out, closing the app, or switching devices (**data persistence guarantee**).
 - **FR-005**: Users MUST be able to explicitly sign out of their account, and after sign-out,
   account-only pages MUST no longer be accessible without signing in again.
 - **FR-006**: The system MUST provide a guided account recovery flow for users who cannot remember
@@ -124,9 +142,13 @@ previous data remains intact.
 - **FR-008**: The system MUST prevent automated guessing of credentials by limiting the impact of
   repeated failed sign-in attempts while still allowing legitimate users to recover access.
 - **FR-009**: The system MUST ensure that a single user can access the same Caltraq account from
-  multiple devices, with consistent access to their saved data.
+  multiple devices, with consistent access to their saved data (**cross-device consistency on top
+  of FR-004’s persistence**).
 - **FR-010**: The system MUST only grant access to account-only features when the user has an
-  active, valid authenticated session.
+  active, valid authenticated session (**access control and session gating, independent of how
+  data is persisted or shared across devices**).
+- **FR-011**: The system MUST handle partially completed account creation attempts so that abandoned sign-up flows do not result in orphaned or inconsistent account records, and users can safely restart the process.
+- **FR-012**: When a user initiates account recovery with an identifier that does not match any existing Caltraq account, the system MUST respond with a clear, non-technical message that does not reveal whether an account exists for that identifier.
 
 ### Key Entities _(include if feature involves data)_
 
@@ -147,7 +169,8 @@ previous data remains intact.
 - **SC-001**: At least 90% of new users who start the account creation process are able to
   complete it and sign in successfully on their first attempt.
 - **SC-002**: At least 95% of sign-in attempts with correct credentials complete in under
-  3 seconds under normal operating conditions.
+  3 seconds under normal operating conditions on typical consumer mobile networks (for example,
+  4G/Wi‑Fi) using current supported devices.
 - **SC-003**: At least 90% of users who request account recovery and follow the provided steps
   regain access to their existing account without contacting support.
 - **SC-004**: After launch of this feature, fewer than 2% of active users report losing access to
