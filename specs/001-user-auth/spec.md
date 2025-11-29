@@ -5,7 +5,13 @@
 **Status**: Draft  
 **Input**: User description: "I am creating an app called Caltraq is a modern calorie-tracking and progress-monitoring app built on proven metabolic science. Using the Katch–McArdle formula and lean body mass calculations, Caltraq gives users accurate daily calorie and protein targets, not generic estimates. Users log their daily intake and weight, and Caltraq automatically analyzes trends, calculates real-world TDEE, and shows whether they’re on track toward their goals. The first feature I want to plan for is User accounts and Authentication which will allow Let users create accounts so their Katch–McArdle settings, logs, and goals persist across devices."
 
-## User Scenarios & Testing *(mandatory)*
+## Clarifications
+
+### Session 2025-11-29
+
+- Q: Which authentication methods are in scope for the first release? → A: Email/password plus Apple/Google sign-in
+
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Create and access a Caltraq account (Priority: P1)
 
@@ -94,17 +100,18 @@ previous data remains intact.
 - What happens when a user attempts to use the recovery flow with an identifier that is not
   associated with any Caltraq account?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
 - **FR-001**: The system MUST allow new users to create a Caltraq account by providing required
   personal details (for example, name and unique identifier such as an email address) and
-  setting secure sign-in credentials.
+  setting secure sign-in credentials (email/password).
 - **FR-002**: The system MUST validate that the chosen account identifier is unique and provide a
   clear, non-technical message when an existing account uses the same identifier.
 - **FR-003**: Users MUST be able to sign in to their existing Caltraq account using their chosen
-  credentials and gain access to account-only features.
+  credentials and gain access to account-only features, using either email/password or supported
+  third-party sign-in options (Apple and Google).
 - **FR-004**: The system MUST maintain a persistent association between each account and that
   user’s Katch–McArdle configuration, historical logs, and goals so that these data are available
   after signing out, closing the app, or switching devices.
@@ -121,7 +128,7 @@ previous data remains intact.
 - **FR-010**: The system MUST only grant access to account-only features when the user has an
   active, valid authenticated session.
 
-### Key Entities *(include if feature involves data)*
+### Key Entities _(include if feature involves data)_
 
 - **User Account**: Represents an individual Caltraq user who can sign in and access
   account-only features. Includes attributes such as unique identifier (for example, email),
@@ -133,7 +140,7 @@ previous data remains intact.
   Includes attributes such as the identifier used to start recovery, creation time, status, and
   expiration.
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
@@ -145,5 +152,3 @@ previous data remains intact.
   regain access to their existing account without contacting support.
 - **SC-004**: After launch of this feature, fewer than 2% of active users report losing access to
   their historical settings, logs, or goals due to account or authentication issues.
-
-
