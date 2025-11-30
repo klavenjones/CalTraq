@@ -18,6 +18,7 @@ Implement a multi-screen onboarding flow that collects user data (units, basic s
 **MVP Scope**: User Story 1 (P1) - Complete onboarding flow to receive personalized targets. This provides the core value proposition and enables users to start using the app.
 
 **Incremental Delivery**:
+
 1. **Phase 1-2**: Setup and foundational infrastructure (required for all stories)
 2. **Phase 3**: User Story 1 (P1) - Core onboarding flow
 3. **Phase 4**: User Story 2 (P2) - Backward navigation (enhances UX)
@@ -39,6 +40,7 @@ Phase 5 (User Story 3 - P3) ──┘
 ```
 
 **Story Dependencies**:
+
 - User Story 1 (P1) is independent and can be completed first
 - User Story 2 (P2) depends on User Story 1 (needs complete flow to navigate backward)
 - User Story 3 (P3) depends on User Story 1 (needs complete flow to resume from)
@@ -47,15 +49,18 @@ Phase 5 (User Story 3 - P3) ──┘
 ## Parallel Execution Opportunities
 
 **Within User Story 1**:
+
 - Validation schemas, calculation utilities, and unit conversion can be developed in parallel
 - Form components can be built in parallel after state management is ready
 - Convex functions can be implemented in parallel with frontend components
 
 **Within User Story 2**:
+
 - Back navigation logic can be implemented independently for each screen
 - Unit conversion on unit change can be developed separately
 
 **Within User Story 3**:
+
 - Persistence layer and resume logic can be developed in parallel with other features
 
 ## Phase 1: Setup
@@ -66,14 +71,14 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ### Tasks
 
-- [ ] T001 Install Zod dependency for form validation in package.json
-- [ ] T002 Install @react-native-async-storage/async-storage dependency for offline caching in package.json
-- [ ] T003 Create onboarding screens directory structure at app/(onboarding)/
-- [ ] T004 Create onboarding components directory at components/onboarding/
-- [ ] T005 Create validation utilities directory at lib/validation/
-- [ ] T006 Create calculation utilities directory at lib/calculations/
-- [ ] T007 Create onboarding utilities directory at lib/onboarding/
-- [ ] T008 Create onboarding tests directory at tests/onboarding/
+- [x] T001 Install Zod dependency for form validation in package.json
+- [x] T002 Install @react-native-async-storage/async-storage dependency for offline caching in package.json
+- [x] T003 Create onboarding screens directory structure at app/(onboarding)/
+- [x] T004 Create onboarding components directory at components/onboarding/
+- [x] T005 Create validation utilities directory at lib/validation/
+- [x] T006 Create calculation utilities directory at lib/calculations/
+- [x] T007 Create onboarding utilities directory at lib/onboarding/
+- [x] T008 Create onboarding tests directory at tests/onboarding/
 
 ## Phase 2: Foundational
 
@@ -83,38 +88,38 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ### Tasks
 
-- [ ] T009 Extend UserAccount table in convex/schema.ts with onboardingCompleted field (optional boolean: false if incomplete, true if completed)
-- [ ] T010 Add by_onboarding_completed index to userAccounts table in convex/schema.ts
-- [ ] T011 Create onboardingProfiles table definition in convex/schema.ts with all required fields per data-model.md (fields: userAccountId, units, height, weight, gender, age, bodyFatPercentage, leanBodyMass, bodyCompositionMethod, neckCircumference, waistCircumference, hipCircumference, activityLevel, goalPhase, goalType, goalValue, calculatedCalorieTarget, calculatedProteinTarget, expectedTimelineWeeks, startDate, currentStep, createdAt, updatedAt, completedAt)
-- [ ] T012 Add by_user_account index to onboardingProfiles table in convex/schema.ts
-- [ ] T013 Add by_completion_status index to onboardingProfiles table in convex/schema.ts
-- [ ] T014 Create onboarding state types in lib/onboarding/state.ts (OnboardingState, OnboardingAction union)
-- [ ] T015 Create initial onboarding state constant in lib/onboarding/state.ts
-- [ ] T016 Implement onboardingReducer function in lib/onboarding/state.ts with all action handlers
-- [ ] T017 Create OnboardingFormContext provider component in lib/onboarding/state.ts
-- [ ] T018 Create useOnboardingForm hook in lib/onboarding/state.ts
-- [ ] T019 Create validation constants file lib/validation/constants.ts with bounds (age 13-120, weight 20-500kg, height 30-300cm, body fat 0-50%)
-- [ ] T020 Create basic stats Zod schema in lib/validation/onboarding.ts (height, weight, gender, age, optional bodyFatPercentage)
-- [ ] T021 Create body composition Zod schema in lib/validation/onboarding.ts (neck, waist, optional hip for females)
-- [ ] T022 Create activity level Zod schema in lib/validation/onboarding.ts (enum validation)
-- [ ] T023 Create goal configuration Zod schema in lib/validation/onboarding.ts (goalPhase, goalType, goalValue)
-- [ ] T024 Create unit conversion constants in lib/calculations/unit-conversion.ts (kgToLb, lbToKg, cmToIn, inToCm)
-- [ ] T025 Implement convertKgToLb function in lib/calculations/unit-conversion.ts with 1 decimal precision
-- [ ] T026 Implement convertLbToKg function in lib/calculations/unit-conversion.ts with precision preservation
-- [ ] T027 Implement convertCmToIn function in lib/calculations/unit-conversion.ts with 1 decimal precision
-- [ ] T028 Implement convertInToCm function in lib/calculations/unit-conversion.ts with precision preservation
-- [ ] T029 Implement convertOnboardingData function in lib/calculations/unit-conversion.ts for unit system changes
-- [ ] T030 Implement calculateBMR function in lib/calculations/katch-mcardle.ts (BMR = 370 + 21.6 × LBM in kg)
-- [ ] T031 Implement calculateTDEE function in lib/calculations/katch-mcardle.ts (TDEE = BMR × activity multiplier)
-- [ ] T032 Create activity multiplier constants in lib/calculations/katch-mcardle.ts (sedentary 1.2, lightly_active 1.375, moderately_active 1.55, very_active 1.725, extremely_active 1.9)
-- [ ] T033 Create goal phase adjustment constants in lib/calculations/katch-mcardle.ts (slow 0.9, moderate 0.8, aggressive 0.7, maintenance 1.0)
-- [ ] T034 Implement calculateGoalCalories function in lib/calculations/katch-mcardle.ts with goal phase adjustments
-- [ ] T035 Implement calculateProteinTarget function in lib/calculations/katch-mcardle.ts (1.6-2.2g/kg based on goal phase)
-- [ ] T036 Implement calculateBodyFatMale function in lib/calculations/body-fat.ts using U.S. Navy formula for males
-- [ ] T037 Implement calculateBodyFatFemale function in lib/calculations/body-fat.ts using U.S. Navy formula for females
-- [ ] T038 Implement calculateBodyFat function in lib/calculations/body-fat.ts with gender-based routing (other uses male formula)
-- [ ] T039 Implement calculateLeanBodyMass function in lib/calculations/body-fat.ts (LBM = weight × (1 - bodyFatPercentage / 100))
-- [ ] T040 Add body fat percentage clamping to 0-50% range in lib/calculations/body-fat.ts
+- [x] T009 Extend UserAccount table in convex/schema.ts with onboardingCompleted field (optional boolean: false if incomplete, true if completed)
+- [x] T010 Add by_onboarding_completed index to userAccounts table in convex/schema.ts
+- [x] T011 Create onboardingProfiles table definition in convex/schema.ts with all required fields per data-model.md (fields: userAccountId, units, height, weight, gender, age, bodyFatPercentage, leanBodyMass, bodyCompositionMethod, neckCircumference, waistCircumference, hipCircumference, activityLevel, goalPhase, goalType, goalValue, calculatedCalorieTarget, calculatedProteinTarget, expectedTimelineWeeks, startDate, currentStep, createdAt, updatedAt, completedAt)
+- [x] T012 Add by_user_account index to onboardingProfiles table in convex/schema.ts
+- [x] T013 Add by_completion_status index to onboardingProfiles table in convex/schema.ts
+- [x] T014 Create onboarding state types in lib/onboarding/state.ts (OnboardingState, OnboardingAction union)
+- [x] T015 Create initial onboarding state constant in lib/onboarding/state.ts
+- [x] T016 Implement onboardingReducer function in lib/onboarding/state.ts with all action handlers
+- [x] T017 Create OnboardingFormContext provider component in lib/onboarding/state.ts
+- [x] T018 Create useOnboardingForm hook in lib/onboarding/state.ts
+- [x] T019 Create validation constants file lib/validation/constants.ts with bounds (age 13-120, weight 20-500kg, height 30-300cm, body fat 0-50%)
+- [x] T020 Create basic stats Zod schema in lib/validation/onboarding.ts (height, weight, gender, age, optional bodyFatPercentage)
+- [x] T021 Create body composition Zod schema in lib/validation/onboarding.ts (neck, waist, optional hip for females)
+- [x] T022 Create activity level Zod schema in lib/validation/onboarding.ts (enum validation)
+- [x] T023 Create goal configuration Zod schema in lib/validation/onboarding.ts (goalPhase, goalType, goalValue)
+- [x] T024 Create unit conversion constants in lib/calculations/unit-conversion.ts (kgToLb, lbToKg, cmToIn, inToCm)
+- [x] T025 Implement convertKgToLb function in lib/calculations/unit-conversion.ts with 1 decimal precision
+- [x] T026 Implement convertLbToKg function in lib/calculations/unit-conversion.ts with precision preservation
+- [x] T027 Implement convertCmToIn function in lib/calculations/unit-conversion.ts with 1 decimal precision
+- [x] T028 Implement convertInToCm function in lib/calculations/unit-conversion.ts with precision preservation
+- [x] T029 Implement convertOnboardingData function in lib/calculations/unit-conversion.ts for unit system changes
+- [x] T030 Implement calculateBMR function in lib/calculations/katch-mcardle.ts (BMR = 370 + 21.6 × LBM in kg)
+- [x] T031 Implement calculateTDEE function in lib/calculations/katch-mcardle.ts (TDEE = BMR × activity multiplier)
+- [x] T032 Create activity multiplier constants in lib/calculations/katch-mcardle.ts (sedentary 1.2, lightly_active 1.375, moderately_active 1.55, very_active 1.725, extremely_active 1.9)
+- [x] T033 Create goal phase adjustment constants in lib/calculations/katch-mcardle.ts (slow 0.9, moderate 0.8, aggressive 0.7, maintenance 1.0)
+- [x] T034 Implement calculateGoalCalories function in lib/calculations/katch-mcardle.ts with goal phase adjustments
+- [x] T035 Implement calculateProteinTarget function in lib/calculations/katch-mcardle.ts (1.6-2.2g/kg based on goal phase)
+- [x] T036 Implement calculateBodyFatMale function in lib/calculations/body-fat.ts using U.S. Navy formula for males
+- [x] T037 Implement calculateBodyFatFemale function in lib/calculations/body-fat.ts using U.S. Navy formula for females
+- [x] T038 Implement calculateBodyFat function in lib/calculations/body-fat.ts with gender-based routing (other uses male formula)
+- [x] T039 Implement calculateLeanBodyMass function in lib/calculations/body-fat.ts (LBM = weight × (1 - bodyFatPercentage / 100))
+- [x] T040 Add body fat percentage clamping to 0-50% range in lib/calculations/body-fat.ts
 
 ## Phase 3: User Story 1 - Complete Onboarding Flow (P1)
 
@@ -124,8 +129,8 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ### Tasks
 
-- [ ] T041 [US1] Create onboarding layout component with progress indicator in app/(onboarding)/_layout.tsx
-- [ ] T042 [US1] Implement progress indicator showing current step and total steps (Step X of 7) in app/(onboarding)/_layout.tsx
+- [ ] T041 [US1] Create onboarding layout component with progress indicator in app/(onboarding)/\_layout.tsx
+- [ ] T042 [US1] Implement progress indicator showing current step and total steps (Step X of 7) in app/(onboarding)/\_layout.tsx
 - [ ] T043 [US1] Create welcome screen component in app/(onboarding)/welcome.tsx with Get Started button
 - [ ] T044 [US1] Integrate existing sign-up flow into welcome screen navigation in app/(onboarding)/welcome.tsx
 - [ ] T045 [US1] Create units selection screen in app/(onboarding)/units.tsx
@@ -174,9 +179,9 @@ Phase 5 (User Story 3 - P3) ──┘
 - [ ] T087 [US1] Create getOnboardingProgress Convex query in convex/onboarding.ts
 - [ ] T088 [US1] Create completeOnboarding Convex mutation in convex/onboarding.ts that saves profile and updates UserAccount.onboardingCompleted
 - [ ] T089 [US1] Create checkOnboardingStatus Convex query in convex/onboarding.ts
-- [ ] T090 [US1] Implement save progress after each screen completion using saveOnboardingProgress in app/(onboarding)/_layout.tsx
+- [ ] T090 [US1] Implement save progress after each screen completion using saveOnboardingProgress in app/(onboarding)/\_layout.tsx
 - [ ] T091 [US1] Implement final save on review confirmation using completeOnboarding in app/(onboarding)/review.tsx
-- [ ] T092 [US1] Update app/_layout.tsx to check onboarding status and redirect incomplete users to onboarding flow
+- [ ] T092 [US1] Update app/\_layout.tsx to check onboarding status and redirect incomplete users to onboarding flow
 - [ ] T093 [US1] Implement navigation from review screen to main app after successful completion in app/(onboarding)/review.tsx
 
 ## Phase 4: User Story 2 - Backward Navigation (P2)
@@ -187,16 +192,16 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ### Tasks
 
-- [ ] T094 [US2] Implement back button in onboarding layout that preserves form state in app/(onboarding)/_layout.tsx
-- [ ] T095 [US2] Implement device back navigation handler that preserves form state in app/(onboarding)/_layout.tsx
-- [ ] T096 [US2] Ensure all form components populate with existing state values from OnboardingFormContext on mount
-- [ ] T097 [US2] Implement unit conversion when user changes units mid-flow in components/onboarding/units-selection-form.tsx
-- [ ] T098 [US2] Update all measurement displays when units change in components/onboarding/basic-stats-form.tsx
-- [ ] T099 [US2] Update all measurement displays when units change in components/onboarding/body-composition-form.tsx
-- [ ] T100 [US2] Handle body fat method change (manual to calculated or vice versa) when navigating back in components/onboarding/basic-stats-form.tsx
-- [ ] T101 [US2] Recalculate calorie and protein targets when activity level changes on review screen in app/(onboarding)/review.tsx
-- [ ] T102 [US2] Recalculate calorie and protein targets when goal changes on review screen in app/(onboarding)/review.tsx
-- [ ] T103 [US2] Recalculate calorie and protein targets when basic stats change on review screen in app/(onboarding)/review.tsx
+- [x] T094 [US2] Implement back button in onboarding layout that preserves form state in app/(onboarding)/\_layout.tsx
+- [x] T095 [US2] Implement device back navigation handler that preserves form state in app/(onboarding)/\_layout.tsx
+- [x] T096 [US2] Ensure all form components populate with existing state values from OnboardingFormContext on mount
+- [x] T097 [US2] Implement unit conversion when user changes units mid-flow in components/onboarding/units-selection-form.tsx
+- [x] T098 [US2] Update all measurement displays when units change in components/onboarding/basic-stats-form.tsx
+- [x] T099 [US2] Update all measurement displays when units change in components/onboarding/body-composition-form.tsx
+- [x] T100 [US2] Handle body fat method change (manual to calculated or vice versa) when navigating back in components/onboarding/basic-stats-form.tsx
+- [x] T101 [US2] Recalculate calorie and protein targets when activity level changes on review screen in app/(onboarding)/review.tsx
+- [x] T102 [US2] Recalculate calorie and protein targets when goal changes on review screen in app/(onboarding)/review.tsx
+- [x] T103 [US2] Recalculate calorie and protein targets when basic stats change on review screen in app/(onboarding)/review.tsx
 
 ## Phase 5: User Story 3 - Resume Capability (P3)
 
@@ -206,16 +211,16 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ### Tasks
 
-- [ ] T104 [US3] Create persistence utility functions in lib/onboarding/persistence.ts
-- [ ] T105 [US3] Implement saveOnboardingProgress function that saves to Convex and caches locally in lib/onboarding/persistence.ts
-- [ ] T106 [US3] Implement loadOnboardingProgress function that loads from Convex first, falls back to local cache in lib/onboarding/persistence.ts
-- [ ] T107 [US3] Implement syncOnboardingProgress function for background sync of cached data in lib/onboarding/persistence.ts
-- [ ] T108 [US3] Integrate AsyncStorage for local caching in lib/onboarding/persistence.ts
-- [ ] T109 [US3] Add error handling for offline scenarios in lib/onboarding/persistence.ts
-- [ ] T110 [US3] Implement resume logic in app/_layout.tsx that checks for incomplete onboarding and redirects to last step
-- [ ] T111 [US3] Load saved progress into OnboardingFormContext on app start in app/(onboarding)/_layout.tsx
-- [ ] T112 [US3] Navigate user to last completed step (currentStep) when resuming in app/(onboarding)/_layout.tsx
-- [ ] T113 [US3] Implement background sync of locally cached data when network becomes available in lib/onboarding/persistence.ts
+- [x] T104 [US3] Create persistence utility functions in lib/onboarding/persistence.ts
+- [x] T105 [US3] Implement saveOnboardingProgress function that saves to Convex and caches locally in lib/onboarding/persistence.ts
+- [x] T106 [US3] Implement loadOnboardingProgress function that loads from Convex first, falls back to local cache in lib/onboarding/persistence.ts
+- [x] T107 [US3] Implement syncOnboardingProgress function for background sync of cached data in lib/onboarding/persistence.ts
+- [x] T108 [US3] Integrate AsyncStorage for local caching in lib/onboarding/persistence.ts
+- [x] T109 [US3] Add error handling for offline scenarios in lib/onboarding/persistence.ts
+- [x] T110 [US3] Implement resume logic in app/\_layout.tsx that checks for incomplete onboarding and redirects to last step
+- [x] T111 [US3] Load saved progress into OnboardingFormContext on app start in app/(onboarding)/\_layout.tsx
+- [x] T112 [US3] Navigate user to last completed step (currentStep) when resuming in app/(onboarding)/\_layout.tsx
+- [x] T113 [US3] Implement background sync of locally cached data when network becomes available in lib/onboarding/persistence.ts
 - [ ] T114 [US3] Add integration test for cross-device sync scenario: user starts onboarding on Device A, signs in on Device B, verifies progress syncs automatically via Convex real-time synchronization in tests/e2e/onboarding-flow.test.ts
 
 ## Final Phase: Polish & Cross-Cutting Concerns
@@ -226,13 +231,13 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ### Tasks
 
-- [ ] T115 Implement network error handling with retry mechanism for final confirmation in app/(onboarding)/review.tsx
-- [ ] T116 Add clear error messages for validation failures in all form components
-- [ ] T117 Implement graceful degradation for offline scenarios with user-friendly messages
-- [ ] T118 Add loading states for save operations in all screens
-- [ ] T119 Implement validation for extreme values (negative weight, age over 150, body fat over 50%) with helpful error messages
-- [ ] T120 Add validation for goal value (target weight must differ from current weight) in components/onboarding/goal-form.tsx
-- [ ] T121 Implement warning acknowledgment flow for unsafe calorie targets (<1200) in components/onboarding/review-summary.tsx
+- [x] T115 Implement network error handling with retry mechanism for final confirmation in app/(onboarding)/review.tsx
+- [x] T116 Add clear error messages for validation failures in all form components
+- [x] T117 Implement graceful degradation for offline scenarios with user-friendly messages
+- [x] T118 Add loading states for save operations in all screens
+- [x] T119 Implement validation for extreme values (negative weight, age over 150, body fat over 50%) with helpful error messages
+- [x] T120 Add validation for goal value (target weight must differ from current weight) in components/onboarding/goal-form.tsx
+- [x] T121 Implement warning acknowledgment flow for unsafe calorie targets (<1200) in components/onboarding/review-summary.tsx
 - [ ] T122 Add accessibility labels and roles to all form inputs
 - [ ] T123 Test dark mode support for all onboarding screens
 - [ ] T124 Test safe area handling on all devices (iOS notch, Android navigation bar)
@@ -250,6 +255,7 @@ Phase 5 (User Story 3 - P3) ──┘
 **Total Tasks**: 133
 
 **Tasks by Phase**:
+
 - Phase 1 (Setup): 8 tasks
 - Phase 2 (Foundational): 32 tasks
 - Phase 3 (User Story 1 - P1): 54 tasks
@@ -258,11 +264,13 @@ Phase 5 (User Story 3 - P3) ──┘
 - Final Phase (Polish): 18 tasks
 
 **Tasks by User Story**:
+
 - User Story 1 (P1): 53 tasks
 - User Story 2 (P2): 10 tasks
 - User Story 3 (P3): 11 tasks
 
 **Parallel Opportunities**:
+
 - Validation schemas, calculations, and unit conversion can be developed in parallel (T019-T040)
 - Form components can be built in parallel after state management is ready (T046, T050, T057, T065, T070)
 - Convex functions can be implemented in parallel with frontend components (T086-T089)
@@ -290,4 +298,3 @@ This provides the core value proposition: users can complete onboarding and rece
 3. Proceed through phases sequentially, completing each phase before moving to the next
 4. Test each user story independently before moving to the next
 5. Complete final polish phase before feature completion
-

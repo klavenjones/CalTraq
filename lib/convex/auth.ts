@@ -29,33 +29,33 @@ export type RecoveryRequestStatus = 'pending' | 'completed' | 'failed' | 'expire
  * Hook to get or create a UserAccount for the current authenticated user
  */
 export function useUserAccount() {
-  return useQuery(api.auth.getCurrentUserAccount);
+  return useQuery(api.users.getCurrentUserAccount);
 }
 
 /**
  * Hook to create or update a UserAccount after successful sign-up/sign-in
  */
 export function useUpsertUserAccount() {
-  return useMutation(api.auth.upsertUserAccount);
+  return useMutation(api.users.upsertUserAccount);
 }
 
 /**
  * Hook to record a successful sign-in
  */
 export function useRecordSignIn() {
-  return useMutation(api.auth.recordSignIn);
+  return useMutation(api.users.recordSignIn);
 }
 
 /**
  * Hook to record a recovery request attempt
  */
 export function useRecordRecoveryRequest() {
-  return useMutation(api.auth.recordRecoveryRequest);
+  return useMutation(api.users.recordRecoveryRequest);
 }
 
 /**
  * Hook to resolve a recovery request
  */
 export function useResolveRecoveryRequest() {
-  return useMutation(api.auth.resolveRecoveryRequest);
+  return useMutation(api.users.resolveRecoveryRequest);
 }

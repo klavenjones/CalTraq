@@ -6,12 +6,13 @@ import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { ThemeProvider } from '@react-navigation/native';
 import { PortalHost } from '@rn-primitives/portal';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
-import { ConvexReactClient, useConvexAuth } from 'convex/react';
-import { Stack } from 'expo-router';
+import { ConvexReactClient, useConvexAuth, useQuery } from 'convex/react';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
+import { api } from '../convex/_generated/api';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -91,6 +92,7 @@ function Routes() {
 
       {/* Screens only shown when the user IS signed in */}
       <Stack.Protected guard={isAuthenticated}>
+        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="index" />
       </Stack.Protected>
 
@@ -102,26 +104,34 @@ function Routes() {
 /**
  * Provider component that loads the UserAccount from Convex
  * for signed-in users and makes it available via context.
+ * Also checks onboarding status and redirects if incomplete.
  */
 function UserAccountProvider({ children }: { children: React.ReactNode }) {
-  // The UserAccount will be loaded from Convex using the useUserAccount hook
-  // This is a placeholder - actual implementation uses useQuery from convex/react
-  // which will be available after running `npx convex dev`
-  const [userAccount, setUserAccount] = React.useState<unknown | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const router = useRouter();
+  const userAccount = useQuery(api.users.getCurrentUserAccount);
+  // TODO: Uncomment after running `npx convex codegen`
+  // const onboardingStatus = useQuery(api.onboarding.checkOnboardingStatus);
+  const isLoading = userAccount === undefined; // || onboardingStatus === undefined;
 
-  // TODO: Replace with actual Convex query once _generated files are available
-  // const userAccount = useQuery(api.auth.getCurrentUserAccount);
-  // const isLoading = userAccount === undefined;
-
+  // Redirect to onboarding if user is authenticated but hasn't completed onboarding
+  // Also handles resume logic - redirects to last step if progress exists
   React.useEffect(() => {
-    // Temporary: mark as loaded after a brief delay
-    // This will be replaced by actual Convex query reactivity
-    const timer = setTimeout(() => setIsLoading(false), 100);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!isLoading && userAccount) {
+      // Check if onboarding is completed
+      const onboardingCompleted = userAccount.onboardingCompleted === true;
+      if (!onboardingCompleted) {
+        // User is signed in but hasn't completed onboarding
+        // Try to get onboarding progress to determine where to redirect
+        // For now, redirect to welcome - the onboarding layout will handle resume
+        router.replace('/(onboarding)/welcome' as any);
+      }
+    }
+  }, [isLoading, userAccount, router]);
 
-  const value = React.useMemo(() => ({ userAccount, isLoading }), [userAccount, isLoading]);
+  const value = React.useMemo(
+    () => ({ userAccount: userAccount ?? null, isLoading }),
+    [userAccount, isLoading]
+  );
 
   return <UserAccountContext.Provider value={value}>{children}</UserAccountContext.Provider>;
 }
