@@ -170,7 +170,7 @@ All research questions answered with clear decisions, rationale, and implementat
 
 **Design Decisions**:
 
-- Screen will be added to `app/(auth)/get-started.tsx` (or `app/get-started.tsx` if outside auth group)
+- Screen will be added to `app/get-started.tsx`
 - Protected by `Stack.Protected guard={!isAuthenticated}` in `_layout.tsx`
 - Uses existing React Native Reusables components (Button, Text)
 - Implements logo error handling with placeholder text fallback
