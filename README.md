@@ -1,32 +1,54 @@
-# Clerk Auth Template
+# CalTraq
 
-This is a [React Native](https://reactnative.dev) project built with [Expo](https://expo.dev), [Clerk](https://go.clerk.com/gjgxNgT), and [React Native Reusables](https://reactnativereusables.com).
+A nutrition tracking mobile app built with [React Native](https://reactnative.dev), [Expo](https://expo.dev), [Clerk](https://go.clerk.com/gjgxNgT) (authentication), [Convex](https://convex.dev) (backend), and [React Native Reusables](https://reactnativereusables.com) (UI).
 
-It was initialized using the following command:
+## Architecture Overview
 
-```bash
-npx @react-native-reusables/cli@latest init -t CalTraq
-```
+### Authentication & Data Persistence
+
+CalTraq uses a dual-provider architecture for authentication and data persistence:
+
+- **Clerk**: Handles user identity, credentials, and SSO (Apple/Google). Manages sign-up, sign-in, password recovery, and session management.
+- **Convex**: Stores application-specific user data (`UserAccount` records) keyed by Clerk user IDs. Provides real-time data sync and serverless functions.
+
+This separation keeps authentication concerns in Clerk while allowing application data to evolve independently in Convex.
+
+For detailed setup and testing instructions, see: [`specs/001-user-auth/quickstart.md`](specs/001-user-auth/quickstart.md)
 
 ## Getting Started
 
-Before running the app, make sure to:
+### Prerequisites
 
-1. [Set up your Clerk account](https://go.clerk.com/blVsQlm)
-2. In the instance setup, leave the default option selected: **Email, phone, username**
-3. Enable Apple, GitHub, and Google as sign-in options under SSO Connections
-4. Rename `.env.example` to `.env.local` and paste your `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` from [your API keys](https://go.clerk.com/u8KAui7)
+1. **Clerk Setup**:
+   - [Create a Clerk account](https://go.clerk.com/blVsQlm)
+   - Enable Email/Password authentication
+   - Enable Apple and Google as SSO Connections (optional)
+   - Create a JWT template named `convex` for Convex integration
 
-Then start the development server:
+2. **Convex Setup**:
+   - [Create a Convex account](https://convex.dev)
+   - Create a new project for CalTraq
+
+3. **Environment Variables**:
+   - Copy `.env.example` to `.env.local`
+   - Add your `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` from [Clerk API keys](https://go.clerk.com/u8KAui7)
+   - Add your `EXPO_PUBLIC_CONVEX_URL` from Convex Dashboard
+   - Add your `CLERK_JWT_ISSUER_DOMAIN` for Convex auth config
+
+### Running the App
 
 ```bash
-npm run dev
-# or
+# Install dependencies
+yarn install
+
+# Start Convex development server (in one terminal)
+npx convex dev
+
+# Start Expo development server (in another terminal)
+yarn dev:expo
+
+# Or run both together
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 This will launch the Expo Go Server. You can open the app with:
@@ -52,15 +74,39 @@ Or scan the QR code with the [Expo Go](https://expo.dev/go) app to test on your 
 
 - ⚛️ Built with [Expo Router](https://expo.dev/router)
 - 🔐 Authentication powered by [Clerk](https://go.clerk.com/Q1MKAz0)
+- 💾 Backend powered by [Convex](https://convex.dev) with real-time sync
 - 🎨 Styled with [Tailwind CSS](https://tailwindcss.com/) via [Nativewind](https://www.nativewind.dev/)
 - 📦 UI powered by [React Native Reusables](https://github.com/founded-labs/react-native-reusables)
 - 🚀 New Architecture enabled
 - 🔥 Edge to Edge enabled
 - 📱 Runs on iOS, Android, and Web
 
+## Project Structure
+
+```
+CalTraq/
+├── app/                    # Expo Router screens
+│   ├── (auth)/            # Authentication screens (sign-in, sign-up, etc.)
+│   └── index.tsx          # Main app screen (protected)
+├── components/            # Reusable UI components
+│   ├── ui/               # React Native Reusables primitives
+│   └── *-form.tsx        # Auth form components
+├── convex/               # Convex backend
+│   ├── schema.ts         # Database schema (UserAccount, RecoveryRequest)
+│   ├── auth.ts           # Auth-related functions
+│   └── auth.config.ts    # Clerk integration config
+├── lib/                  # Shared utilities
+│   ├── clerk/auth.ts     # Clerk helper hooks
+│   └── convex/auth.ts    # Convex auth hooks
+└── tests/                # Test files
+    ├── auth/             # Unit tests for auth components
+    └── e2e/              # End-to-end auth flow tests
+```
+
 ## Learn More
 
 - [Clerk Docs](https://go.clerk.com/Q1MKAz0)
+- [Convex Docs](https://docs.convex.dev)
 - [React Native Docs](https://reactnative.dev/docs/getting-started)
 - [Expo Docs](https://docs.expo.dev/)
 - [Nativewind Docs](https://www.nativewind.dev/)

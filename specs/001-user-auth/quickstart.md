@@ -10,29 +10,81 @@ feature using Clerk for identity and Convex for persistent user account records.
 
 ## Prerequisites
 
-- Node.js and Yarn (or your preferred package manager) installed.
+- Node.js (v18+) and Yarn (or npm) installed.
 - Expo CLI available (via `npx` or globally).
 - A Clerk instance configured with:
-  - Email/password authentication
-  - Apple and Google sign-in enabled
-- A Convex project created for Caltraq.
-- Local environment file (`.env.local`) configured with the required Clerk and Convex keys.
+  - Email/password authentication enabled
+  - Apple and Google sign-in enabled (optional but recommended)
+  - JWT template named "convex" configured for Convex integration
+- A Convex project created for Caltraq at [convex.dev](https://convex.dev).
+- Local environment file (`.env.local`) configured with required keys.
 
 ---
 
 ## 1. Configure environment variables
 
-1. Ensure `.env.local` exists at the project root.
-2. Add or confirm the following keys (names are illustrative; align with your existing setup):
-   - `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - Convex-related keys required by the Convex client and server configuration
-3. Restart the Expo dev server after changing environment variables.
+1. Copy `.env.example` to `.env.local` at the project root (if available), or create `.env.local`.
+2. Add the following required environment variables:
+
+```bash
+# Clerk Configuration
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx  # From Clerk Dashboard > API Keys
+
+# Convex Configuration  
+EXPO_PUBLIC_CONVEX_URL=https://xxx.convex.cloud  # From Convex Dashboard
+
+# Convex Server-side (for auth.config.ts)
+CLERK_JWT_ISSUER_DOMAIN=https://xxx.clerk.accounts.dev  # Your Clerk JWT issuer domain
+```
+
+3. **Important**: Restart the Expo dev server after changing environment variables.
+
+### Setting up Clerk + Convex Integration
+
+1. In your Clerk Dashboard, go to **JWT Templates**.
+2. Create a new template named `convex`.
+3. Configure it to include the claims Convex needs for authentication.
+4. Copy the **Issuer URL** (e.g., `https://clerk.xxx.accounts.dev`) to `CLERK_JWT_ISSUER_DOMAIN`.
 
 ---
 
-## 2. Run the app
+## 2. Install dependencies
 
 From the repository root:
+
+```bash
+yarn install
+```
+
+---
+
+## 3. Initialize Convex
+
+Before running the app, initialize Convex:
+
+```bash
+npx convex dev
+```
+
+This will:
+- Prompt you to log in to Convex (if not already logged in)
+- Create the `convex/_generated/` directory with TypeScript types
+- Start the Convex development server
+- Push your schema and functions to Convex
+
+Keep this terminal running while developing.
+
+---
+
+## 4. Run the app
+
+In a separate terminal, from the repository root:
+
+```bash
+yarn dev:expo
+```
+
+Or use the combined command that runs both Convex and Expo:
 
 ```bash
 yarn dev
@@ -41,11 +93,11 @@ yarn dev
 Then:
 
 - Press `i` for iOS simulator (Mac), `a` for Android emulator, or `w` for Web.
-- Or scan the Expo QR code with Expo Go.
+- Or scan the Expo QR code with Expo Go on your physical device.
 
 ---
 
-## 3. Exercise key flows
+## 5. Exercise key flows
 
 1. **Create account (P1)**
    - Open the sign-up flow in the app.
@@ -69,7 +121,7 @@ Then:
 
 ---
 
-## 4. Observability and troubleshooting
+## 6. Observability and troubleshooting
 
 - Watch the development logs (Metro bundler / Expo CLI output) for any auth-related errors.
 - For Convex:
@@ -84,7 +136,7 @@ If sign-in or account creation fails, check:
 
 ---
 
-## 5. Next steps
+## 7. Next steps
 
 - Add automated tests for:
   - Successful sign-up and sign-in.

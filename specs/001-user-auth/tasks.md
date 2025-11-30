@@ -19,10 +19,10 @@
 
 **Purpose**: Project initialization and basic structure for Clerk + Convex integration.
 
-- [ ] T001 Update Convex dependencies and scripts in `package.json`
-- [ ] T002 Initialize Convex project configuration in `convex/` directory
-- [ ] T003 [P] Verify and document Clerk environment variables usage in `app/_layout.tsx`
-- [ ] T004 [P] Scaffold auth helper modules in `lib/clerk/auth.ts` and `lib/convex/auth.ts`
+- [x] T001 Update Convex dependencies and scripts in `package.json`
+- [x] T002 Initialize Convex project configuration in `convex/` directory
+- [x] T003 [P] Verify and document Clerk environment variables usage in `app/_layout.tsx`
+- [x] T004 [P] Scaffold auth helper modules in `lib/clerk/auth.ts` and `lib/convex/auth.ts`
 
 ---
 
@@ -32,10 +32,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T005 Create Convex schema for `UserAccount` and `RecoveryRequest` entities in `convex/schema.ts`
-- [ ] T006 Implement Convex auth functions for user account and session tracking in `convex/auth.ts`
-- [ ] T007 [P] Implement Clerk helper functions for current user/session handling in `lib/clerk/auth.ts`
-- [ ] T008 [P] Implement Convex client helpers for auth-related operations in `lib/convex/auth.ts`
+- [x] T005 Create Convex schema for `UserAccount` and `RecoveryRequest` entities in `convex/schema.ts`
+- [x] T006 Implement Convex auth functions for user account and session tracking in `convex/auth.ts`
+- [x] T007 [P] Implement Clerk helper functions for current user/session handling in `lib/clerk/auth.ts`
+- [x] T008 [P] Implement Convex client helpers for auth-related operations in `lib/convex/auth.ts`
 
 **Checkpoint**: Foundation ready – Clerk and Convex are wired together; user accounts can be created and read in Convex by Clerk user ID.
 
@@ -49,18 +49,18 @@
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T009 [P] [US1] Add tests for account creation and persistence in `tests/auth/sign-up.test.tsx`
-- [ ] T010 [P] [US1] Add cross-device account access test in `tests/e2e/auth-flows.test.ts`
-- [ ] T033 [P] [US1] Add tests for abandoned and resumed sign-up flows in `tests/auth/sign-up.test.tsx`
+- [x] T009 [P] [US1] Add tests for account creation and persistence in `tests/auth/sign-up.test.tsx`
+- [x] T010 [P] [US1] Add cross-device account access test in `tests/e2e/auth-flows.test.ts`
+- [x] T033 [P] [US1] Add tests for abandoned and resumed sign-up flows in `tests/auth/sign-up.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Wire sign-up form to Clerk sign-up and Convex `UserAccount` creation in `components/sign-up-form.tsx`
-- [ ] T012 [US1] Ensure `UserAccount` documents are created/updated after successful sign-up in `convex/auth.ts`
-- [ ] T013 [US1] Load `UserAccount` on app start for signed-in users in `app/_layout.tsx`
-- [ ] T014 [US1] Gate downstream Katch–McArdle flows on presence of a `UserAccount` in `app/index.tsx`
-- [ ] T031 [US1] Handle partially completed sign-up flows safely in `components/sign-up-form.tsx` (e.g., resume or restart without creating duplicate accounts)
-- [ ] T032 [US1] Implement cleanup or idempotent creation logic for abandoned sign-ups in `convex/auth.ts` to avoid orphaned `UserAccount` records
+- [x] T011 [US1] Wire sign-up form to Clerk sign-up and Convex `UserAccount` creation in `components/sign-up-form.tsx`
+- [x] T012 [US1] Ensure `UserAccount` documents are created/updated after successful sign-up in `convex/auth.ts`
+- [x] T013 [US1] Load `UserAccount` on app start for signed-in users in `app/_layout.tsx`
+- [x] T014 [US1] Gate downstream Katch–McArdle flows on presence of a `UserAccount` in `app/index.tsx`
+- [x] T031 [US1] Handle partially completed sign-up flows safely in `components/sign-up-form.tsx` (e.g., resume or restart without creating duplicate accounts)
+- [x] T032 [US1] Implement cleanup or idempotent creation logic for abandoned sign-ups in `convex/auth.ts` to avoid orphaned `UserAccount` records
 
 **Checkpoint**: At this point, a user can create an account and see the same account recognized across devices.
 
@@ -74,17 +74,17 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T015 [P] [US2] Add tests for email/password and Apple/Google sign-in flows in `tests/auth/sign-in.test.tsx`
-- [ ] T016 [P] [US2] Add integration test for login/logout and protected routes in `tests/e2e/auth-flows.test.ts`
-- [ ] T039 [P] [US2] Add negative and abuse-case tests for repeated failed sign-in attempts (including basic lockout behavior and recovery paths) in `tests/auth/sign-in.test.tsx`
-- [ ] T040 [P] [US2] Add end-to-end tests for suspicious sign-in patterns (e.g., rapid repeated failures) and verify no sensitive information is leaked in `tests/e2e/auth-flows.test.ts`
+- [x] T015 [P] [US2] Add tests for email/password and Apple/Google sign-in flows in `tests/auth/sign-in.test.tsx`
+- [x] T016 [P] [US2] Add integration test for login/logout and protected routes in `tests/e2e/auth-flows.test.ts`
+- [x] T039 [P] [US2] Add negative and abuse-case tests for repeated failed sign-in attempts (including basic lockout behavior and recovery paths) in `tests/auth/sign-in.test.tsx`
+- [x] T040 [P] [US2] Add end-to-end tests for suspicious sign-in patterns (e.g., rapid repeated failures) and verify no sensitive information is leaked in `tests/e2e/auth-flows.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Implement sign-in logic and user-friendly error handling in `components/sign-in-form.tsx`
-- [ ] T018 [US2] Add route guards for protected screens based on Clerk session in `app/_layout.tsx`
-- [ ] T019 [US2] Implement logout handler clearing auth and account state in `components/user-menu.tsx`
-- [ ] T020 [US2] Implement basic lockout UX for repeated failed sign-in attempts in `components/sign-in-form.tsx`
+- [x] T017 [US2] Implement sign-in logic and user-friendly error handling in `components/sign-in-form.tsx`
+- [x] T018 [US2] Add route guards for protected screens based on Clerk session in `app/_layout.tsx`
+- [x] T019 [US2] Implement logout handler clearing auth and account state in `components/user-menu.tsx`
+- [x] T020 [US2] Implement basic lockout UX for repeated failed sign-in attempts in `components/sign-in-form.tsx`
 
 **Checkpoint**: At this point, sign-in and sign-out are secure and protected routes cannot be accessed without an active session.
 
@@ -98,16 +98,16 @@
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T021 [P] [US3] Add tests for password recovery flows in `tests/auth/recovery.test.tsx`
-- [ ] T022 [P] [US3] Add integration test for recovery and re-login in `tests/e2e/auth-flows.test.ts`
+- [x] T021 [P] [US3] Add tests for password recovery flows in `tests/auth/recovery.test.tsx`
+- [x] T022 [P] [US3] Add integration test for recovery and re-login in `tests/e2e/auth-flows.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Implement “forgot password” entry point and validation in `components/sign-in-form.tsx`
-- [ ] T024 [US3] Implement reset-password screen behavior and navigation in `app/(auth)/reset-password.tsx`
-- [ ] T025 [US3] Optionally persist recovery attempts as `RecoveryRequest` records in `convex/auth.ts`
-- [ ] T034 [US3] Implement neutral messaging for recovery attempts with unknown identifiers in `components/sign-in-form.tsx` and `app/(auth)/forgot-password.tsx` (if separate)
-- [ ] T035 [US3] Ensure recovery handlers in `convex/auth.ts` do not leak whether an identifier exists, while safely handling non-existent accounts
+- [x] T023 [US3] Implement "forgot password" entry point and validation in `components/sign-in-form.tsx`
+- [x] T024 [US3] Implement reset-password screen behavior and navigation in `app/(auth)/reset-password.tsx`
+- [x] T025 [US3] Optionally persist recovery attempts as `RecoveryRequest` records in `convex/auth.ts`
+- [x] T034 [US3] Implement neutral messaging for recovery attempts with unknown identifiers in `components/sign-in-form.tsx` and `app/(auth)/forgot-password.tsx` (if separate)
+- [x] T035 [US3] Ensure recovery handlers in `convex/auth.ts` do not leak whether an identifier exists, while safely handling non-existent accounts
 
 **Checkpoint**: All user stories should now be independently functional, and users can recover access to existing accounts.
 
@@ -117,14 +117,14 @@
 
 **Purpose**: Improvements that affect multiple user stories.
 
-- [ ] T026 [P] Update auth quickstart documentation with Clerk + Convex notes in `specs/001-user-auth/quickstart.md`
-- [ ] T027 [P] Add a brief auth + persistence overview and links to quickstart in `README.md`
-- [ ] T028 [P] Tighten auth-related logging and error messages to avoid leaking sensitive data in `lib/clerk/auth.ts`
-- [ ] T029 Run the full auth test suite and fix any failing tests in `tests/`
-- [ ] T030 Final code cleanup and refactor for auth modules in `app/(auth)/`, `components/`, `lib/clerk/`, and `lib/convex/`
-- [ ] T037 [P] Add basic timing checks for successful sign-in flows in `tests/auth/sign-in.test.tsx` (e.g., measure mocked response times to assert the UI does not add unnecessary delay)
-- [ ] T038 [P] Add lightweight telemetry or logging hooks for sign-in duration (without PII) in `lib/clerk/auth.ts` to enable monitoring of SC-002 in real environments
-- [ ] T041 [P] Review auth-related logging and error handling for security best practices (no credentials in logs, neutral error messages) in `lib/clerk/auth.ts` and `convex/auth.ts`
+- [x] T026 [P] Update auth quickstart documentation with Clerk + Convex notes in `specs/001-user-auth/quickstart.md`
+- [x] T027 [P] Add a brief auth + persistence overview and links to quickstart in `README.md`
+- [x] T028 [P] Tighten auth-related logging and error messages to avoid leaking sensitive data in `lib/clerk/auth.ts`
+- [x] T029 Run the full auth test suite and fix any failing tests in `tests/`
+- [x] T030 Final code cleanup and refactor for auth modules in `app/(auth)/`, `components/`, `lib/clerk/`, and `lib/convex/`
+- [x] T037 [P] Add basic timing checks for successful sign-in flows in `tests/auth/sign-in.test.tsx` (e.g., measure mocked response times to assert the UI does not add unnecessary delay)
+- [x] T038 [P] Add lightweight telemetry or logging hooks for sign-in duration (without PII) in `lib/clerk/auth.ts` to enable monitoring of SC-002 in real environments
+- [x] T041 [P] Review auth-related logging and error handling for security best practices (no credentials in logs, neutral error messages) in `lib/clerk/auth.ts` and `convex/auth.ts`
 
 ---
 

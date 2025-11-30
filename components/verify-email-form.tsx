@@ -4,9 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/ui/text';
 import { useSignUp } from '@clerk/clerk-expo';
+import { useMutation } from 'convex/react';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as React from 'react';
 import { type TextStyle, View } from 'react-native';
+import { api } from '../convex/_generated/api';
 
 const RESEND_CODE_INTERVAL_SECONDS = 30;
 
@@ -18,6 +20,9 @@ export function VerifyEmailForm() {
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState('');
   const { countdown, restartCountdown } = useCountdown(RESEND_CODE_INTERVAL_SECONDS);
+
+  // Convex mutation to create/update UserAccount after successful sign-up
+  const upsertUserAccount = useMutation(api.auth.upsertUserAccount);
 
   async function onSubmit() {
     if (!isLoaded) return;
@@ -32,6 +37,16 @@ export function VerifyEmailForm() {
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
         await setActive({ session: signUpAttempt.createdSessionId });
+
+        // Create or update the UserAccount in Convex after successful sign-up
+        // This ensures the user has a Convex account linked to their Clerk identity
+        try {
+          await upsertUserAccount({ email: email || signUpAttempt.emailAddress || '' });
+        } catch (convexErr) {
+          // Log but don't block the sign-up flow - account can be created on next sign-in
+          console.warn('Failed to create UserAccount in Convex:', convexErr);
+        }
+
         return;
       }
       // TODO: Handle other statuses

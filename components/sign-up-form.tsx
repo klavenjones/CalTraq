@@ -8,17 +8,36 @@ import { Text } from '@/components/ui/text';
 import { useSignUp } from '@clerk/clerk-expo';
 import { Link, router } from 'expo-router';
 import * as React from 'react';
-import { TextInput, View } from 'react-native';
+import { ActivityIndicator, TextInput, View } from 'react-native';
 
 export function SignUpForm() {
   const { signUp, isLoaded } = useSignUp();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const passwordInputRef = React.useRef<TextInput>(null);
   const [error, setError] = React.useState<{ email?: string; password?: string }>({});
 
+  // Handle resuming a partially completed sign-up flow
+  React.useEffect(() => {
+    if (!isLoaded || !signUp) return;
+
+    // Check if there's an existing sign-up that needs email verification
+    // This handles the case where the user started sign-up but didn't complete verification
+    if (signUp.status === 'missing_requirements') {
+      const emailNeedsVerification = signUp.unverifiedFields?.includes('email_address');
+      if (emailNeedsVerification && signUp.emailAddress) {
+        // Resume the sign-up flow by navigating to email verification
+        router.push(`/(auth)/sign-up/verify-email?email=${signUp.emailAddress}`);
+      }
+    }
+  }, [isLoaded, signUp]);
+
   async function onSubmit() {
-    if (!isLoaded) return;
+    if (!isLoaded || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError({});
 
     // Start sign-up process using email and password provided
     try {
@@ -38,9 +57,12 @@ export function SignUpForm() {
           err.message.toLowerCase().includes('identifier') ||
           err.message.toLowerCase().includes('email');
         setError(isEmailMessage ? { email: err.message } : { password: err.message });
-        return;
+      } else {
+        console.error(JSON.stringify(err, null, 2));
+        setError({ email: 'An unexpected error occurred. Please try again.' });
       }
-      console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -92,8 +114,12 @@ export function SignUpForm() {
                 <Text className="text-sm font-medium text-destructive">{error.password}</Text>
               ) : null}
             </View>
-            <Button className="w-full" onPress={onSubmit}>
-              <Text>Continue</Text>
+            <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text>Continue</Text>
+              )}
             </Button>
           </View>
           <Text className="text-center text-sm">
