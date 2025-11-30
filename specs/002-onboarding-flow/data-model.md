@@ -13,26 +13,29 @@ This document defines the data entities, relationships, validation rules, and st
 **Description**: Existing user account entity extended with onboarding completion tracking.
 
 **Fields**:
+
 - `clerkUserId` (string, required): External unique identifier from Clerk
 - `email` (string, required): Primary email address
 - `createdAt` (number, required): Timestamp when account was created
 - `status` (enum, required): Account status (`pending`, `active`, `suspended`, `deleted`)
 - `lastSignInAt` (number, optional): Timestamp of most recent sign-in
 - `onboardingCompleted` (number, optional): **NEW** - Timestamp when onboarding was completed (null if not completed)
-- `onboardingCompletedAt` (number, optional): **NEW** - Alias for onboardingCompleted (for clarity)
 
 **Indexes**:
+
 - `by_clerk_user_id`: Index on `clerkUserId`
 - `by_email`: Index on `email`
 - `by_status`: Index on `status`
 - `by_onboarding_completed`: **NEW** - Index on `onboardingCompleted` (for querying incomplete users)
 
 **Validation Rules**:
+
 - `onboardingCompleted` must be a valid timestamp (number > 0) or null
 - If `onboardingCompleted` is set, `status` must be `active`
 - `onboardingCompleted` cannot be in the future
 
 **State Transitions**:
+
 - `onboardingCompleted: null` → `onboardingCompleted: timestamp` (when user completes onboarding)
 - Can be reset to `null` if user chooses to re-onboard (via Settings)
 
@@ -41,6 +44,7 @@ This document defines the data entities, relationships, validation rules, and st
 **Description**: Stores all onboarding data collected during the flow, linked to a UserAccount.
 
 **Fields**:
+
 - `_id` (Id<"onboardingProfiles">, auto-generated): Unique identifier
 - `userAccountId` (Id<"userAccounts">, required): Reference to UserAccount
 - `units` (enum, required): Unit preference (`imperial` | `metric`)
@@ -68,10 +72,12 @@ This document defines the data entities, relationships, validation rules, and st
 - `completedAt` (number, optional): Timestamp when onboarding was completed
 
 **Indexes**:
+
 - `by_user_account`: Index on `userAccountId` (for quick lookup)
 - `by_completion_status`: Index on `completedAt` (for querying incomplete profiles)
 
 **Validation Rules**:
+
 - `height` must be between 30-300 cm (1-10 feet)
 - `weight` must be between 20-500 kg (44-1100 lbs)
 - `age` must be between 13-120 years
@@ -83,18 +89,20 @@ This document defines the data entities, relationships, validation rules, and st
 - `activityLevel` must be one of the defined enum values
 - `goalPhase` must be one of the defined enum values
 - `goalValue` must be positive
-- `calculatedCalorieTarget` must be between 1200-5000 calories (with warnings for extremes)
+- `calculatedCalorieTarget` must be between 1200-5000 calories (with warnings for extremes). The minimum safe threshold of 1200 calories applies universally to all adult users regardless of age or gender.
 - `calculatedProteinTarget` must be between 20-500 grams
 - `currentStep` must be between 0-6 if provided
 - `startDate` cannot be in the past (minimum: current timestamp)
 
 **State Transitions**:
+
 - **Created**: Profile created when user starts onboarding (step 0)
 - **In Progress**: `currentStep` increments as user progresses (steps 1-5)
 - **Completed**: `completedAt` set when user confirms on Review screen (step 6)
 - **Updated**: Profile can be updated if user re-onboards via Settings
 
 **Relationships**:
+
 - One-to-one with `UserAccount` (one profile per user)
 - Profile can exist in incomplete state (for resume capability)
 
@@ -103,16 +111,45 @@ This document defines the data entities, relationships, validation rules, and st
 **Description**: Body measurements used to calculate body fat percentage. Stored as part of OnboardingProfile rather than separate entity.
 
 **Fields** (embedded in OnboardingProfile):
+
 - `neckCircumference` (number, optional): Neck circumference in cm
 - `waistCircumference` (number, optional): Waist circumference in cm
 - `hipCircumference` (number, optional): Hip circumference in cm (females only)
 - `calculatedBodyFatPercentage` (number, optional): Calculated body fat percentage
 - `calculatedLeanBodyMass` (number, optional): Calculated lean body mass in kg
 
+**Calculation Formulas (U.S. Navy Method)**:
+
+All measurements must be in centimeters. The formulas use base-10 logarithms.
+
+**For Male Users**:
+
+```text
+bodyFatPercentage = 495 / (1.0324 - 0.19077 × log₁₀(waist - neck) + 0.15456 × log₁₀(height)) - 450
+```
+
+**For Female Users**:
+
+```text
+bodyFatPercentage = 495 / (1.29579 - 0.35004 × log₁₀(waist + hip - neck) + 0.221 × log₁₀(height)) - 450
+```
+
+**For Gender "Other"**:
+
+The system uses the male formula as the default calculation method.
+
+**Lean Body Mass Calculation**:
+
+```text
+leanBodyMass = weight × (1 - bodyFatPercentage / 100)
+```
+
 **Validation Rules**:
+
 - All measurements must be positive
 - `waistCircumference` > `neckCircumference` (logical constraint)
 - If `gender` is `female` and method is `calculated`, `hipCircumference` is required
+- Calculated body fat percentage must be clamped to physiologically reasonable range (0-50%)
 - Calculated values must be within physiologically reasonable ranges
 
 ### 4. GoalConfiguration (Embedded in OnboardingProfile)
@@ -120,6 +157,7 @@ This document defines the data entities, relationships, validation rules, and st
 **Description**: User's goal phase and target settings. Stored as part of OnboardingProfile.
 
 **Fields** (embedded in OnboardingProfile):
+
 - `goalPhase` (enum): `slow`, `moderate`, `aggressive`, `maintenance`
 - `goalType` (enum): `weekly_change` or `target_weight`
 - `goalValue` (number): Weekly change in kg/week OR target weight in kg
@@ -129,12 +167,14 @@ This document defines the data entities, relationships, validation rules, and st
 - `startDate` (number): When the plan becomes active
 
 **Calculation Logic**:
+
 - BMR = 370 + (21.6 × LBM in kg)
 - TDEE = BMR × Activity Multiplier
 - Goal Calories = TDEE × Goal Phase Adjustment
 - Protein Target = Weight (kg) × Protein Multiplier (1.6-2.2g/kg based on goal phase)
 
 **Activity Multipliers**:
+
 - `sedentary`: 1.2
 - `lightly_active`: 1.375
 - `moderately_active`: 1.55
@@ -142,6 +182,7 @@ This document defines the data entities, relationships, validation rules, and st
 - `extremely_active`: 1.9
 
 **Goal Phase Adjustments**:
+
 - `slow`: -10% (multiply by 0.9)
 - `moderate`: -20% (multiply by 0.8)
 - `aggressive`: -30% (multiply by 0.7)
@@ -226,6 +267,7 @@ userAccounts: defineTable({
 ## Data Migration
 
 **Existing Users**: Users who signed up before onboarding flow will have:
+
 - `UserAccount.onboardingCompleted = null`
 - No `OnboardingProfile` record
 - Will be prompted to complete onboarding on first app launch after feature release
@@ -249,4 +291,3 @@ userAccounts: defineTable({
 - `leanBodyMass` must be less than `weight`
 - `calculatedCalorieTarget` must respect minimum safe threshold (1200 calories)
 - `goalValue` for `target_weight` must be different from current `weight`
-
