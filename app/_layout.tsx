@@ -83,6 +83,7 @@ function Routes() {
     <Stack>
       {/* Screens only shown when the user is NOT signed in */}
       <Stack.Protected guard={!isAuthenticated}>
+        <Stack.Screen name="get-started" options={DEFAULT_AUTH_SCREEN_OPTIONS} />
         <Stack.Screen name="(auth)/sign-in" options={SIGN_IN_SCREEN_OPTIONS} />
         <Stack.Screen name="(auth)/sign-up" options={SIGN_UP_SCREEN_OPTIONS} />
         <Stack.Screen name="(auth)/reset-password" options={DEFAULT_AUTH_SCREEN_OPTIONS} />
@@ -127,12 +128,11 @@ function UserAccountProvider({ children }: { children: React.ReactNode }) {
 }
 
 const SIGN_IN_SCREEN_OPTIONS = {
-  headerShown: false,
-  title: 'Sign in',
+  heaerTransparent: true,
+  title: '',
 };
 
 const SIGN_UP_SCREEN_OPTIONS = {
-  presentation: 'modal',
   title: '',
   headerTransparent: true,
   gestureEnabled: false,

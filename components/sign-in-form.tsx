@@ -33,7 +33,7 @@ export function SignInForm() {
   const [lockoutRemaining, setLockoutRemaining] = React.useState(0);
 
   // Convex mutation to record sign-in and upsert user account
-  const upsertUserAccount = useMutation(api.auth.upsertUserAccount);
+  const upsertUserAccount = useMutation(api.users.upsertUserAccount);
 
   // Lockout countdown effect
   React.useEffect(() => {
@@ -128,9 +128,9 @@ export function SignInForm() {
 
   return (
     <View className="gap-6">
-      <Card className="border-border/0 shadow-none sm:border-border sm:shadow-sm sm:shadow-black/5">
+      <Card className="shadow-none border-border/0 sm:border-border sm:shadow-sm sm:shadow-black/5">
         <CardHeader>
-          <CardTitle className="text-center text-xl sm:text-left">Sign in to CalTraq</CardTitle>
+          <CardTitle className="text-xl text-center sm:text-left">Sign in to CalTraq</CardTitle>
           <CardDescription className="text-center sm:text-left">
             Welcome back! Please sign in to continue
           </CardDescription>
@@ -161,7 +161,7 @@ export function SignInForm() {
                   <Button
                     variant="link"
                     size="sm"
-                    className="ml-auto h-4 px-1 py-0 web:h-fit sm:h-4">
+                    className="px-1 py-0 ml-auto h-4 web:h-fit sm:h-4">
                     <Text className="font-normal leading-4">Forgot your password?</Text>
                   </Button>
                 </Link>
@@ -179,13 +179,13 @@ export function SignInForm() {
               ) : null}
             </View>
             {error.general ? (
-              <Text className="text-center text-sm font-medium text-destructive">
+              <Text className="text-sm font-medium text-center text-destructive">
                 {error.general}
               </Text>
             ) : null}
             {isLockedOut ? (
-              <View className="rounded-md bg-destructive/10 p-3">
-                <Text className="text-center text-sm text-destructive">
+              <View className="p-3 rounded-md bg-destructive/10">
+                <Text className="text-sm text-center text-destructive">
                   Too many attempts. Please wait {lockoutRemaining} seconds.
                 </Text>
               </View>
@@ -198,7 +198,7 @@ export function SignInForm() {
               )}
             </Button>
           </View>
-          <Text className="text-center text-sm">
+          <Text className="text-sm text-center">
             Don&apos;t have an account?{' '}
             <Link href="/(auth)/sign-up" className="text-sm underline underline-offset-4">
               Sign up
