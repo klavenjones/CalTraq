@@ -33,4 +33,3 @@
 
 - All checklist items pass validation. The specification is ready for `/speckit.clarify` or `/speckit.plan`.
 - One assumption was made: The "Already have an account?" link navigates to sign-in (standard UX pattern), even though the user description mentioned "sign up screen" - this is documented in the Assumptions section.
-
