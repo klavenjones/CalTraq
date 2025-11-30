@@ -19,7 +19,7 @@ This document defines the data entities, relationships, validation rules, and st
 - `createdAt` (number, required): Timestamp when account was created
 - `status` (enum, required): Account status (`pending`, `active`, `suspended`, `deleted`)
 - `lastSignInAt` (number, optional): Timestamp of most recent sign-in
-- `onboardingCompleted` (number, optional): **NEW** - Timestamp when onboarding was completed (null if not completed)
+- `onboardingCompleted` (boolean, optional): **NEW** - Boolean flag indicating whether onboarding has been completed (`false` if incomplete, `true` if completed). The actual completion timestamp is stored in `OnboardingProfile.completedAt` for audit trail purposes.
 
 **Indexes**:
 
@@ -30,14 +30,14 @@ This document defines the data entities, relationships, validation rules, and st
 
 **Validation Rules**:
 
-- `onboardingCompleted` must be a valid timestamp (number > 0) or null
-- If `onboardingCompleted` is set, `status` must be `active`
-- `onboardingCompleted` cannot be in the future
+- `onboardingCompleted` must be a boolean value (`true` or `false`)
+- If `onboardingCompleted` is `true`, `status` must be `active`
+- `onboardingCompleted` defaults to `false` for new users
 
 **State Transitions**:
 
-- `onboardingCompleted: null` → `onboardingCompleted: timestamp` (when user completes onboarding)
-- Can be reset to `null` if user chooses to re-onboard (via Settings)
+- `onboardingCompleted: false` → `onboardingCompleted: true` (when user completes onboarding)
+- Can be reset to `false` if user chooses to re-onboard (via Settings)
 
 ### 2. OnboardingProfile
 
@@ -166,6 +166,31 @@ leanBodyMass = weight × (1 - bodyFatPercentage / 100)
 - `expectedTimelineWeeks` (number, optional): Calculated weeks to reach goal
 - `startDate` (number): When the plan becomes active
 
+**Timeline Calculation**:
+
+For `goalType = 'target_weight'`:
+
+```typescript
+const weeklyChangeRate = {
+  slow: 0.25, // kg/week
+  moderate: 0.5, // kg/week
+  aggressive: 0.75, // kg/week
+  maintenance: 0, // N/A for maintenance
+};
+expectedTimelineWeeks = Math.ceil((currentWeight - goalValue) / weeklyChangeRate[goalPhase]);
+```
+
+For `goalType = 'weekly_change'`:
+
+```typescript
+// Estimate target weight based on weekly change rate
+const estimatedTargetWeight = currentWeight - goalValue * estimatedWeeks;
+// Or calculate based on calorie deficit and estimated rate
+expectedTimelineWeeks = Math.ceil((currentWeight - estimatedTargetWeight) / Math.abs(goalValue));
+```
+
+If timeline cannot be calculated (e.g., maintenance goal), set to `null` and display "Timeline will be calculated after plan starts" in UI.
+
 **Calculation Logic**:
 
 - BMR = 370 + (21.6 × LBM in kg)
@@ -192,10 +217,10 @@ leanBodyMass = weight × (1 - bodyFatPercentage / 100)
 
 ### Onboarding Flow States
 
-1. **Not Started**: No OnboardingProfile exists, `UserAccount.onboardingCompleted` is null
+1. **Not Started**: No OnboardingProfile exists, `UserAccount.onboardingCompleted` is `false` or undefined
 2. **In Progress**: OnboardingProfile exists with `completedAt` null, `currentStep` indicates progress
-3. **Completed**: OnboardingProfile exists with `completedAt` set, `UserAccount.onboardingCompleted` set
-4. **Re-onboarding**: UserAccount.onboardingCompleted reset to null, new OnboardingProfile created or existing updated
+3. **Completed**: OnboardingProfile exists with `completedAt` set, `UserAccount.onboardingCompleted` set to `true`
+4. **Re-onboarding**: UserAccount.onboardingCompleted reset to `false`, new OnboardingProfile created or existing updated
 
 ### Data Persistence Strategy
 
@@ -258,7 +283,7 @@ onboardingProfiles: defineTable({
 // Update userAccounts table in convex/schema.ts
 userAccounts: defineTable({
   // ... existing fields
-  onboardingCompleted: v.optional(v.number()), // timestamp or null
+  onboardingCompleted: v.optional(v.boolean()), // boolean flag: false if incomplete, true if completed
 })
   // ... existing indexes
   .index('by_onboarding_completed', ['onboardingCompleted']),
@@ -268,7 +293,7 @@ userAccounts: defineTable({
 
 **Existing Users**: Users who signed up before onboarding flow will have:
 
-- `UserAccount.onboardingCompleted = null`
+- `UserAccount.onboardingCompleted = false` (or undefined, treated as false)
 - No `OnboardingProfile` record
 - Will be prompted to complete onboarding on first app launch after feature release
 

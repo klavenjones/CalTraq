@@ -236,7 +236,7 @@ All technical unknowns have been resolved in `research.md`:
 
 **Data Model** (`data-model.md`):
 
-- Extended `UserAccount` entity with `onboardingCompleted` field
+- Extended `UserAccount` entity with `onboardingCompleted` field (boolean type: `false` if incomplete, `true` if completed; see `data-model.md` for complete definition)
 - New `OnboardingProfile` entity with all onboarding data
 - Embedded `BodyCompositionData` and `GoalConfiguration`
 - Complete validation rules and state transitions

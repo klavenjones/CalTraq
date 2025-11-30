@@ -98,7 +98,7 @@ paths:
       summary: Complete onboarding and activate plan
       description: |
         Marks onboarding as completed, saves final profile data,
-        and updates UserAccount.onboardingCompleted timestamp.
+        and updates UserAccount.onboardingCompleted to true (boolean).
         This is called when the user confirms on the Review screen.
       operationId: completeOnboarding
       requestBody:
@@ -267,7 +267,14 @@ components:
           minimum: 0
         activityLevel:
           type: string
-          enum: [sedentary, lightly_active, moderately_active, very_active, extremely_active]
+          enum:
+            [
+              sedentary,
+              lightly_active,
+              moderately_active,
+              very_active,
+              extremely_active,
+            ]
         goalPhase:
           type: string
           enum: [slow, moderate, aggressive, maintenance]
@@ -365,7 +372,14 @@ components:
           nullable: true
         activityLevel:
           type: string
-          enum: [sedentary, lightly_active, moderately_active, very_active, extremely_active]
+          enum:
+            [
+              sedentary,
+              lightly_active,
+              moderately_active,
+              very_active,
+              extremely_active,
+            ]
         goalPhase:
           type: string
           enum: [slow, moderate, aggressive, maintenance]
@@ -393,4 +407,3 @@ components:
         details:
           type: object
           description: Additional error details
-

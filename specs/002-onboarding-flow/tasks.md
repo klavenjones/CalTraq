@@ -83,9 +83,9 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ### Tasks
 
-- [ ] T009 Extend UserAccount table in convex/schema.ts with onboardingCompleted field (optional number timestamp)
+- [ ] T009 Extend UserAccount table in convex/schema.ts with onboardingCompleted field (optional boolean: false if incomplete, true if completed)
 - [ ] T010 Add by_onboarding_completed index to userAccounts table in convex/schema.ts
-- [ ] T011 Create onboardingProfiles table definition in convex/schema.ts with all required fields per data-model.md
+- [ ] T011 Create onboardingProfiles table definition in convex/schema.ts with all required fields per data-model.md (fields: userAccountId, units, height, weight, gender, age, bodyFatPercentage, leanBodyMass, bodyCompositionMethod, neckCircumference, waistCircumference, hipCircumference, activityLevel, goalPhase, goalType, goalValue, calculatedCalorieTarget, calculatedProteinTarget, expectedTimelineWeeks, startDate, currentStep, createdAt, updatedAt, completedAt)
 - [ ] T012 Add by_user_account index to onboardingProfiles table in convex/schema.ts
 - [ ] T013 Add by_completion_status index to onboardingProfiles table in convex/schema.ts
 - [ ] T014 Create onboarding state types in lib/onboarding/state.ts (OnboardingState, OnboardingAction union)
@@ -163,6 +163,7 @@ Phase 5 (User Story 3 - P3) ──┘
 - [ ] T077 [US1] Create review summary component in components/onboarding/review-summary.tsx displaying all entered values
 - [ ] T078 [US1] Implement Katch–McArdle calculation chain (BMR → TDEE → Goal Calories) in app/(onboarding)/review.tsx
 - [ ] T079 [US1] Implement protein target calculation in app/(onboarding)/review.tsx
+- [ ] T079a [US1] Implement expected timeline calculation function in app/(onboarding)/review.tsx using formulas from FR-016 (target_weight and weekly_change goal types with weeklyChangeRate based on goal phase)
 - [ ] T080 [US1] Display calculated daily calorie target in components/onboarding/review-summary.tsx
 - [ ] T081 [US1] Display calculated protein target in components/onboarding/review-summary.tsx
 - [ ] T082 [US1] Display expected timeline to reach goal in components/onboarding/review-summary.tsx
@@ -215,7 +216,7 @@ Phase 5 (User Story 3 - P3) ──┘
 - [ ] T111 [US3] Load saved progress into OnboardingFormContext on app start in app/(onboarding)/_layout.tsx
 - [ ] T112 [US3] Navigate user to last completed step (currentStep) when resuming in app/(onboarding)/_layout.tsx
 - [ ] T113 [US3] Implement background sync of locally cached data when network becomes available in lib/onboarding/persistence.ts
-- [ ] T114 [US3] Handle cross-device sync via Convex real-time synchronization (automatic, verify in tests)
+- [ ] T114 [US3] Add integration test for cross-device sync scenario: user starts onboarding on Device A, signs in on Device B, verifies progress syncs automatically via Convex real-time synchronization in tests/e2e/onboarding-flow.test.ts
 
 ## Final Phase: Polish & Cross-Cutting Concerns
 
@@ -246,12 +247,12 @@ Phase 5 (User Story 3 - P3) ──┘
 
 ## Task Summary
 
-**Total Tasks**: 132
+**Total Tasks**: 133
 
 **Tasks by Phase**:
 - Phase 1 (Setup): 8 tasks
 - Phase 2 (Foundational): 32 tasks
-- Phase 3 (User Story 1 - P1): 53 tasks
+- Phase 3 (User Story 1 - P1): 54 tasks
 - Phase 4 (User Story 2 - P2): 10 tasks
 - Phase 5 (User Story 3 - P3): 11 tasks
 - Final Phase (Polish): 18 tasks
