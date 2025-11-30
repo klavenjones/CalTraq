@@ -11,11 +11,21 @@ This feature has been designed to comply with the Caltraq Constitution:
 
 - **Principle 1 – Typed, Functional, Modular Expo React Native Code**: All onboarding screens and form components will be implemented as typed functional components in TypeScript, with clear separation of concerns and reusable validation utilities.
 - **Principle 2 – UI, Styling, and Layout with React Native Reusables**: Onboarding screens will use React Native Reusables components styled via Nativewind, supporting dark mode and respecting safe areas. Form inputs, buttons, and navigation will follow consistent design patterns.
-- **Principle 3 – State Management, Data Fetching, and Performance**: Onboarding form state will be managed efficiently, with progress saved to allow users to resume if they leave mid-flow. Data will be persisted to Convex only upon completion to minimize unnecessary writes.
+- **Principle 3 – State Management, Data Fetching, and Performance**: Onboarding form state will be managed efficiently, with progress saved incrementally to Convex after each screen (with local caching for offline support) to allow users to resume if they leave mid-flow.
 - **Principle 4 – Navigation, Workflow, and Platform Coverage**: Onboarding flow will be implemented with Expo Router, with clear navigation paths and consistent behavior across iOS, Android, and Web. Deep linking to specific onboarding steps will be supported where appropriate.
 - **Principle 5 – Reliability, Testing, Error Handling, Security, and i18n**: Critical onboarding flows will have automated tests; input validation will use robust runtime validation; errors will be handled with clear user-facing messages; all user data will be transmitted securely over HTTPS.
 
 No intentional constitution violations are planned for this feature. Any deviation MUST be documented in the implementation plan and pull requests.
+
+## Clarifications
+
+### Session 2025-01-27
+
+- Q: Where should onboarding progress be saved during the flow? → A: Save incrementally to Convex after each screen (with local caching for offline support)
+- Q: How should onboarding completion status be tracked? → A: Add an `onboardingCompleted` boolean field (or timestamp) to the existing UserAccount entity in Convex
+- Q: How should users access the re-onboarding/update flow? → A: Settings screen option to "Update Profile/Goals" that navigates to onboarding screens with pre-populated values
+- Q: What are the exact activity level multiplier values for TDEE calculation? → A: Standard TDEE multipliers: Sedentary (1.2), Lightly Active (1.375), Moderately Active (1.55), Very Active (1.725), Extremely Active (1.9)
+- Q: What are the calorie adjustments for each goal phase? → A: Standard percentages: Slow (-10% deficit), Moderate (-20% deficit), Aggressive (-30% deficit), Maintenance (0% change)
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -66,7 +76,7 @@ A user who starts onboarding but closes the app or navigates away wants to resum
 
 **Acceptance Scenarios**:
 
-1. **Given** a user who has started onboarding and entered information on at least one screen, **When** they close the app or navigate away, **Then** their progress is saved locally or to their account.
+1. **Given** a user who has started onboarding and entered information on at least one screen, **When** they close the app or navigate away, **Then** their progress is saved incrementally to Convex (with local caching for offline support).
 2. **Given** a user who has partially completed onboarding, **When** they return to the app and are authenticated, **Then** they are automatically redirected to the onboarding flow at the last screen they reached, with all previously entered values populated.
 3. **Given** a user who has completed onboarding, **When** they return to the app, **Then** they are not shown the onboarding flow again and are taken directly to the main app.
 
@@ -97,19 +107,20 @@ A user who starts onboarding but closes the app or navigates away wants to resum
 - **FR-009**: The system MUST require either a manually entered body fat percentage OR completion of the Body Composition Wizard before allowing progression to Activity Level selection.
 - **FR-010**: The system MUST validate all body measurements and calculated values (body fat percentage, lean body mass) to ensure they fall within physiologically reasonable ranges, displaying clear error messages for invalid inputs.
 - **FR-011**: The system MUST automatically calculate body fat percentage and lean body mass (LBM) from body measurements using gender-appropriate formulas (e.g., U.S. Navy method) when the Body Composition Wizard is completed.
-- **FR-012**: The system MUST present an Activity Level selection screen with options corresponding to TDEE multipliers: Sedentary, Lightly Active, Moderately Active, Very Active, and Extremely Active (or equivalent standard activity level categories).
+- **FR-012**: The system MUST present an Activity Level selection screen with options corresponding to TDEE multipliers: Sedentary (1.2), Lightly Active (1.375), Moderately Active (1.55), Very Active (1.725), and Extremely Active (1.9).
 - **FR-013**: The system MUST allow users to set their goal on a Set Goal screen by choosing a phase (Slow, Moderate, Aggressive, Maintenance) and either a target weekly weight change OR a target weight.
-- **FR-014**: The system MUST automatically calculate recommended daily calories and protein targets using the Katch–McArdle formula (BMR = 370 + (21.6 × LBM in kg)) combined with the selected activity level multiplier and goal phase adjustments.
+- **FR-014**: The system MUST automatically calculate recommended daily calories and protein targets using the Katch–McArdle formula (BMR = 370 + (21.6 × LBM in kg)) combined with the selected activity level multiplier and goal phase adjustments: Slow (-10% deficit), Moderate (-20% deficit), Aggressive (-30% deficit), Maintenance (0% change).
 - **FR-015**: The system MUST enforce minimum safe calorie thresholds (e.g., not below 1200 calories for adults) and display warnings when calculated targets fall below safe levels, allowing users to adjust their goal if needed.
 - **FR-016**: The system MUST present a Review & Confirm Plan screen that displays the calculated daily calorie goal, protein target, expected timeline to reach the goal, and start date before final confirmation.
-- **FR-017**: The system MUST track onboarding completion status per user account, preventing completed users from seeing the onboarding flow again unless they explicitly choose to update their settings.
+- **FR-017**: The system MUST track onboarding completion status per user account using an `onboardingCompleted` field (boolean or timestamp) on the UserAccount entity, preventing completed users from seeing the onboarding flow again unless they explicitly choose to update their settings via a "Update Profile/Goals" option in the Settings screen, which navigates to onboarding screens with pre-populated values.
 - **FR-018**: The system MUST save all onboarding data (units, stats, body composition, activity level, goals, calculated targets) to the user's profile upon confirmation, making this data available throughout the app.
 - **FR-019**: The system MUST allow users to navigate backward through onboarding screens, preserving entered values and recalculating dependent values (such as calorie targets) when previous inputs are modified.
-- **FR-020**: The system MUST save onboarding progress incrementally (locally or to the account) so users can resume from their last screen if they leave mid-flow.
+- **FR-020**: The system MUST save onboarding progress incrementally to Convex after each screen (with local caching for offline support) so users can resume from their last screen if they leave mid-flow, even if they switch devices or lose network connectivity temporarily.
 - **FR-021**: The system MUST handle network errors gracefully during the final confirmation step, allowing users to retry saving their onboarding data without losing their entered information.
 
 ### Key Entities _(include if feature involves data)_
 
+- **UserAccount** (existing entity, to be extended): The UserAccount entity will include an `onboardingCompleted` field (boolean or timestamp) to track whether a user has completed the onboarding flow. This field is checked to determine whether to show the onboarding flow or redirect to the main app.
 - **Onboarding Profile**: Represents the collection of user data gathered during onboarding. Includes attributes such as unit preference (Imperial/Metric), height, gender, age, current weight, body fat percentage, lean body mass, activity level, goal phase, target weight change or target weight, calculated daily calorie target, calculated protein target, expected timeline, and start date. Linked to the UserAccount entity.
 - **Body Composition Data**: Represents measurements used to calculate body fat percentage. Includes attributes such as neck circumference, waist circumference, hip circumference (if applicable), calculated body fat percentage, and calculated lean body mass. May be stored as part of Onboarding Profile or as a separate entity.
 - **Goal Configuration**: Represents the user's selected goal phase and target. Includes attributes such as phase (Slow, Moderate, Aggressive, Maintenance), target type (weekly weight change or target weight), target value, calculated daily calorie target, calculated protein target, expected timeline, and start date. Stored as part of Onboarding Profile.

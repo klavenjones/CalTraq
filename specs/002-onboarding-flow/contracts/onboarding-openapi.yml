@@ -1,0 +1,396 @@
+openapi: 3.0.3
+info:
+  title: Caltraq Onboarding API
+  description: |
+    API contracts for the Caltraq onboarding flow feature.
+    These are Convex functions (mutations and queries) that handle
+    onboarding data persistence and retrieval.
+  version: 1.0.0
+  contact:
+    name: Caltraq Development Team
+
+servers:
+  - url: https://{deployment}.convex.cloud
+    description: Convex deployment URL
+    variables:
+      deployment:
+        default: your-deployment
+
+tags:
+  - name: onboarding
+    description: Onboarding flow operations
+
+paths:
+  /saveOnboardingProgress:
+    post:
+      tags:
+        - onboarding
+      summary: Save incremental onboarding progress
+      description: |
+        Saves the current onboarding state after each screen completion.
+        This allows users to resume onboarding if they leave mid-flow.
+      operationId: saveOnboardingProgress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingProgress'
+      responses:
+        '200':
+          description: Progress saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  profileId:
+                    type: string
+                    description: ID of the onboarding profile
+                  updatedAt:
+                    type: number
+                    description: Timestamp of the update
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /getOnboardingProgress:
+    get:
+      tags:
+        - onboarding
+      summary: Get current onboarding progress
+      description: |
+        Retrieves the user's current onboarding progress, if any.
+        Returns null if no progress exists.
+      operationId: getOnboardingProgress
+      responses:
+        '200':
+          description: Onboarding progress retrieved
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/OnboardingProfile'
+                  - type: 'null'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /completeOnboarding:
+    post:
+      tags:
+        - onboarding
+      summary: Complete onboarding and activate plan
+      description: |
+        Marks onboarding as completed, saves final profile data,
+        and updates UserAccount.onboardingCompleted timestamp.
+        This is called when the user confirms on the Review screen.
+      operationId: completeOnboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteOnboardingRequest'
+      responses:
+        '200':
+          description: Onboarding completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  profileId:
+                    type: string
+                  completedAt:
+                    type: number
+        '400':
+          description: Invalid input or incomplete data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /updateOnboardingProfile:
+    post:
+      tags:
+        - onboarding
+      summary: Update existing onboarding profile (re-onboarding)
+      description: |
+        Updates an existing onboarding profile when a user chooses
+        to re-onboard via Settings. Allows updating goals and stats.
+      operationId: updateOnboardingProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOnboardingRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  profileId:
+                    type: string
+                  updatedAt:
+                    type: number
+        '400':
+          description: Invalid input
+        '401':
+          description: Not authenticated
+        '404':
+          description: Profile not found
+
+  /checkOnboardingStatus:
+    get:
+      tags:
+        - onboarding
+      summary: Check if user has completed onboarding
+      description: |
+        Quick check to determine if user needs to see onboarding flow.
+        Used for routing decisions on app startup.
+      operationId: checkOnboardingStatus
+      responses:
+        '200':
+          description: Onboarding status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isCompleted:
+                    type: boolean
+                  completedAt:
+                    type: number
+                    nullable: true
+                  hasProgress:
+                    type: boolean
+                    description: Whether user has partial progress saved
+                  currentStep:
+                    type: number
+                    nullable: true
+                    minimum: 0
+                    maximum: 6
+        '401':
+          description: Not authenticated
+
+components:
+  schemas:
+    OnboardingProgress:
+      type: object
+      required:
+        - units
+        - height
+        - weight
+        - gender
+        - age
+        - activityLevel
+        - goalPhase
+        - goalType
+        - goalValue
+        - currentStep
+      properties:
+        units:
+          type: string
+          enum: [imperial, metric]
+        height:
+          type: number
+          description: Height in centimeters
+          minimum: 30
+          maximum: 300
+        weight:
+          type: number
+          description: Weight in kilograms
+          minimum: 20
+          maximum: 500
+        gender:
+          type: string
+          enum: [male, female, other]
+        age:
+          type: number
+          minimum: 13
+          maximum: 120
+        bodyFatPercentage:
+          type: number
+          nullable: true
+          minimum: 0
+          maximum: 50
+        leanBodyMass:
+          type: number
+          nullable: true
+          minimum: 0
+        bodyCompositionMethod:
+          type: string
+          nullable: true
+          enum: [manual, calculated]
+        neckCircumference:
+          type: number
+          nullable: true
+          minimum: 0
+        waistCircumference:
+          type: number
+          nullable: true
+          minimum: 0
+        hipCircumference:
+          type: number
+          nullable: true
+          minimum: 0
+        activityLevel:
+          type: string
+          enum: [sedentary, lightly_active, moderately_active, very_active, extremely_active]
+        goalPhase:
+          type: string
+          enum: [slow, moderate, aggressive, maintenance]
+        goalType:
+          type: string
+          enum: [weekly_change, target_weight]
+        goalValue:
+          type: number
+          minimum: 0
+        calculatedCalorieTarget:
+          type: number
+          nullable: true
+          minimum: 1200
+          maximum: 5000
+        calculatedProteinTarget:
+          type: number
+          nullable: true
+          minimum: 20
+          maximum: 500
+        expectedTimelineWeeks:
+          type: number
+          nullable: true
+          minimum: 0
+        startDate:
+          type: number
+          description: Timestamp when plan starts
+        currentStep:
+          type: number
+          description: Current step index (0-6)
+          minimum: 0
+          maximum: 6
+
+    OnboardingProfile:
+      allOf:
+        - $ref: '#/components/schemas/OnboardingProgress'
+        - type: object
+          properties:
+            _id:
+              type: string
+              description: Profile ID
+            userAccountId:
+              type: string
+              description: User account ID
+            createdAt:
+              type: number
+              description: Creation timestamp
+            updatedAt:
+              type: number
+              description: Last update timestamp
+            completedAt:
+              type: number
+              nullable: true
+              description: Completion timestamp
+
+    CompleteOnboardingRequest:
+      type: object
+      required:
+        - calculatedCalorieTarget
+        - calculatedProteinTarget
+        - startDate
+      properties:
+        calculatedCalorieTarget:
+          type: number
+          minimum: 1200
+          maximum: 5000
+        calculatedProteinTarget:
+          type: number
+          minimum: 20
+          maximum: 500
+        expectedTimelineWeeks:
+          type: number
+          nullable: true
+        startDate:
+          type: number
+          description: Timestamp when plan starts
+
+    UpdateOnboardingRequest:
+      type: object
+      description: Partial update of onboarding profile
+      properties:
+        units:
+          type: string
+          enum: [imperial, metric]
+        height:
+          type: number
+        weight:
+          type: number
+        gender:
+          type: string
+          enum: [male, female, other]
+        age:
+          type: number
+        bodyFatPercentage:
+          type: number
+          nullable: true
+        activityLevel:
+          type: string
+          enum: [sedentary, lightly_active, moderately_active, very_active, extremely_active]
+        goalPhase:
+          type: string
+          enum: [slow, moderate, aggressive, maintenance]
+        goalType:
+          type: string
+          enum: [weekly_change, target_weight]
+        goalValue:
+          type: number
+        calculatedCalorieTarget:
+          type: number
+        calculatedProteinTarget:
+          type: number
+        startDate:
+          type: number
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        details:
+          type: object
+          description: Additional error details
+

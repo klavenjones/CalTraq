@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2025-11-29
 
 ## Active Technologies
+- TypeScript 5.9.2 with strict type checking (002-onboarding-flow)
 
 - TypeScript, Expo React Native (current stable SDK) + Expo, React Native, Expo Router, Clerk (authentication), Convex (backend (001-user-auth)
 
@@ -22,6 +23,7 @@ npm test && npm run lint
 TypeScript, Expo React Native (current stable SDK): Follow standard conventions
 
 ## Recent Changes
+- 002-onboarding-flow: Added TypeScript 5.9.2 with strict type checking
 
 - 001-user-auth: Added TypeScript, Expo React Native (current stable SDK) + Expo, React Native, Expo Router, Clerk (authentication), Convex (backend
 
