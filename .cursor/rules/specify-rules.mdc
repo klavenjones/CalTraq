@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2025-11-29
 
 ## Active Technologies
+- TypeScript 5.9.2 with strict mode enabled (002-get-started-screen)
+- N/A (presentation layer only, no data persistence) (002-get-started-screen)
 
 - TypeScript, Expo React Native (current stable SDK) + Expo, React Native, Expo Router, Clerk (authentication), Convex (backend (001-user-auth)
 
@@ -22,6 +24,7 @@ npm test && npm run lint
 TypeScript, Expo React Native (current stable SDK): Follow standard conventions
 
 ## Recent Changes
+- 002-get-started-screen: Added TypeScript 5.9.2 with strict mode enabled
 
 - 001-user-auth: Added TypeScript, Expo React Native (current stable SDK) + Expo, React Native, Expo Router, Clerk (authentication), Convex (backend
 
