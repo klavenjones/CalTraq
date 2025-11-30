@@ -1,0 +1,29 @@
+# CalTraq Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2025-11-29
+
+## Active Technologies
+
+- TypeScript, Expo React Native (current stable SDK) + Expo, React Native, Expo Router, Clerk (authentication), Convex (backend (001-user-auth)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+npm test && npm run lint
+
+## Code Style
+
+TypeScript, Expo React Native (current stable SDK): Follow standard conventions
+
+## Recent Changes
+
+- 001-user-auth: Added TypeScript, Expo React Native (current stable SDK) + Expo, React Native, Expo Router, Clerk (authentication), Convex (backend
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

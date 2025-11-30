@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: Caltraq Authentication API (Conceptual)
+  version: 1.0.0
+  description: >
+    Conceptual contracts for Caltraq user account and authentication behavior. In the
+    actual implementation, Clerk and Convex SDKs may be used instead of a raw HTTP API,
+    but these contracts describe the expected inputs and outputs.
+
+paths:
+  /auth/account:
+    post:
+      summary: Create a Caltraq user account record
+      description: >
+        Create a Caltraq UserAccount record in Convex, linked to an existing Clerk user.
+        Called after Clerk has successfully created and verified the user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clerkUserId:
+                  type: string
+                email:
+                  type: string
+                  format: email
+              required:
+                - clerkUserId
+                - email
+      responses:
+        '201':
+          description: User account created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userAccountId:
+                    type: string
+        '400':
+          description: Invalid input (for example, malformed email)
+        '409':
+          description: Account already exists for this Clerk user
+
+  /auth/session:
+    post:
+      summary: Record a successful sign-in
+      description: >
+        Record that a user has successfully signed in so that lastSignInAt and optional
+        session metadata can be tracked.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clerkUserId:
+                  type: string
+                clientInfo:
+                  type: string
+                  description: High-level client information (for example, "iOS", "Android", "Web").
+              required:
+                - clerkUserId
+      responses:
+        '200':
+          description: Sign-in recorded successfully
+        '404':
+          description: No matching Caltraq user account found for the Clerk user
+
+  /auth/recovery:
+    post:
+      summary: Record account recovery attempt
+      description: >
+        Record that a user has initiated an account recovery flow so that outcomes can be
+        analyzed and abuse can be monitored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identifierUsed:
+                  type: string
+                  description: Identifier provided for recovery (for example, email).
+              required:
+                - identifierUsed
+      responses:
+        '202':
+          description: Recovery attempt recorded

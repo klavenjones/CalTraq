@@ -3,11 +3,18 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "dev": "expo start -c",
+    "dev": "npx convex dev & expo start -c",
+    "dev:expo": "expo start -c",
+    "dev:convex": "npx convex dev",
     "android": "expo start -c --android",
     "ios": "expo start -c --ios",
     "web": "expo start -c --web",
-    "clean": "rm -rf .expo node_modules"
+    "clean": "rm -rf .expo node_modules",
+    "convex:deploy": "npx convex deploy",
+    "convex:generate": "npx convex codegen",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.16.1",
@@ -20,6 +27,7 @@
     "@rn-primitives/slot": "^1.2.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "convex": "^1.21.0",
     "expo": "^54.0.0",
     "expo-auth-session": "~7.0.8",
     "expo-linking": "~8.0.8",
@@ -46,9 +54,15 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^12.4.3",
+    "@types/jest": "^29.5.12",
     "@types/react": "~19.1.10",
+    "jest": "^29.7.0",
+    "jest-expo": "^54.0.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
+    "react-test-renderer": "19.1.0",
     "typescript": "~5.9.2"
   },
   "private": true

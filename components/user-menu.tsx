@@ -7,16 +7,35 @@ import { useAuth, useUser } from '@clerk/clerk-expo';
 import type { TriggerRef } from '@rn-primitives/popover';
 import { LogOutIcon, PlusIcon, SettingsIcon } from 'lucide-react-native';
 import * as React from 'react';
-import { View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 export function UserMenu() {
   const { user } = useUser();
   const { signOut } = useAuth();
   const popoverTriggerRef = React.useRef<TriggerRef>(null);
+  const [isSigningOut, setIsSigningOut] = React.useState(false);
 
+  /**
+   * Handle sign-out by clearing the Clerk session.
+   * The route guards in _layout.tsx will automatically redirect
+   * to the sign-in screen once the session is cleared.
+   */
   async function onSignOut() {
-    popoverTriggerRef.current?.close();
-    await signOut();
+    if (isSigningOut) return;
+
+    setIsSigningOut(true);
+    try {
+      popoverTriggerRef.current?.close();
+      // Clear the Clerk session - this will trigger the route guards
+      // and redirect to the auth screens
+      await signOut();
+    } catch (err) {
+      console.error('Failed to sign out:', err);
+      // Even if there's an error, we should try to clear the session
+      // The user can try again if needed
+    } finally {
+      setIsSigningOut(false);
+    }
   }
 
   return (
@@ -51,9 +70,15 @@ export function UserMenu() {
               <Icon as={SettingsIcon} className="size-4" />
               <Text>Manage Account</Text>
             </Button>
-            <Button variant="outline" size="sm" className="flex-1" onPress={onSignOut}>
-              <Icon as={LogOutIcon} className="size-4" />
-              <Text>Sign Out</Text>
+            <Button variant="outline" size="sm" className="flex-1" onPress={onSignOut} disabled={isSigningOut}>
+              {isSigningOut ? (
+                <ActivityIndicator size="small" />
+              ) : (
+                <>
+                  <Icon as={LogOutIcon} className="size-4" />
+                  <Text>Sign Out</Text>
+                </>
+              )}
             </Button>
           </View>
         </View>
