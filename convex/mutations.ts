@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
 import { requireUserId } from './utils';
 
 export const createProfile = mutation({
@@ -101,9 +102,7 @@ export const logNote = mutation({
 });
 
 async function upsertDailyLog(
-  ctx: Parameters<typeof mutation>[0]['handler'] extends (ctx: infer Ctx, args: any) => any
-    ? Ctx
-    : never,
+  ctx: MutationCtx,
   userId: string,
   date: string,
   patch: { calories?: number; protein?: number; weight?: number; notes?: string }
