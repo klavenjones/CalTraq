@@ -12,7 +12,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import convex from '@/lib/convex';
-import { useConvexAuth } from 'convex/react';
+import { useConvexAuth, useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -39,7 +40,7 @@ SplashScreen.preventAutoHideAsync();
 
 function Routes() {
   const { isLoaded } = useAuth();
-  const { isAuthenticated: isConvexAuthenticated } = useConvexAuth();
+  const { isAuthenticated: isConvexAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth();
 
   React.useEffect(() => {
     if (isLoaded) {
@@ -47,7 +48,8 @@ function Routes() {
     }
   }, [isLoaded]);
 
-  if (!isLoaded) {
+  // Prevent auth-screen flicker while Convex auth is still being established.
+  if (!isLoaded || isConvexAuthLoading) {
     return null;
   }
 
@@ -63,6 +65,7 @@ function Routes() {
 
       {/* Screens only shown when the user IS signed in */}
       <Stack.Protected guard={isConvexAuthenticated}>
+        <EnsureUser />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
       </Stack.Protected>
@@ -70,6 +73,24 @@ function Routes() {
       {/* Screens outside the guards are accessible to everyone (e.g. not found) */}
     </Stack>
   );
+}
+
+function EnsureUser() {
+  const ensureUser = useMutation(api.mutations.ensureUser);
+  const { isAuthenticated } = useConvexAuth();
+  const hasEnsuredRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      hasEnsuredRef.current = false;
+      return;
+    }
+    if (hasEnsuredRef.current) return;
+    hasEnsuredRef.current = true;
+    void ensureUser({});
+  }, [ensureUser, isAuthenticated]);
+
+  return null;
 }
 
 const SIGN_IN_SCREEN_OPTIONS = {

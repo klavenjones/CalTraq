@@ -1,5 +1,6 @@
 import { ActivityLevelSelector } from '@/components/activity-level-selector';
 import { GoalSelector } from '@/components/goal-selector';
+import { UnitSystemSelector } from '@/components/unit-system-selector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,8 @@ import {
   calculateEstimatedTdee,
   calculateLeanBodyMassKg,
 } from '@/lib/calculations';
+import type { UnitSystem } from '@/lib/units';
+import { inchesToCm, lbsToKg } from '@/lib/units';
 import type { ActivityLevel, Goal, Sex } from '@/lib/types';
 import { useMutation, useQuery } from 'convex/react';
 import { router } from 'expo-router';
@@ -20,8 +23,12 @@ import * as React from 'react';
 import { View } from 'react-native';
 
 export default function OnboardingScreen() {
+  const user = useQuery(api.queries.getUser, {});
   const profile = useQuery(api.queries.getProfile, {});
   const createProfile = useMutation(api.mutations.createProfile);
+  const setUnitSystem = useMutation(api.mutations.setUnitSystem);
+
+  const unitSystem: UnitSystem = user?.unitSystem ?? 'metric';
 
   React.useEffect(() => {
     if (profile) {
@@ -41,7 +48,7 @@ export default function OnboardingScreen() {
   const [activityLevel, setActivityLevel] = React.useState<ActivityLevel>('lightly_active');
   const [goal, setGoal] = React.useState<Goal>('maintain');
 
-  const parsed = parseAll({ age, heightCm, weightKg, bodyFat });
+  const parsed = parseAll({ age, heightInput: heightCm, weightInput: weightKg, bodyFat }, unitSystem);
   const metrics =
     parsed.ok
       ? (() => {
@@ -62,7 +69,7 @@ export default function OnboardingScreen() {
 
   const goNext = () => {
     setError(null);
-    const err = validateStep(step, { age, heightCm, weightKg, bodyFat });
+    const err = validateStep(step, { age, heightInput: heightCm, weightInput: weightKg, bodyFat }, unitSystem);
     if (err) return setError(err);
     setStep((s) => Math.min(2, s + 1));
   };
@@ -107,6 +114,21 @@ export default function OnboardingScreen() {
           {step === 0 ? (
             <>
               <View className="gap-2">
+                <Label>Units</Label>
+                <UnitSystemSelector
+                  value={unitSystem}
+                  disabled={user === undefined || !user}
+                  onChange={(next) => {
+                    setError(null);
+                    void setUnitSystem({ unitSystem: next });
+                  }}
+                />
+                <Text variant="muted" className="text-xs">
+                  You can change this later in Settings.
+                </Text>
+              </View>
+
+              <View className="gap-2">
                 <Label>Age</Label>
                 <Input value={age} onChangeText={setAge} keyboardType="number-pad" placeholder="e.g. 28" />
               </View>
@@ -135,22 +157,22 @@ export default function OnboardingScreen() {
           {step === 1 ? (
             <>
               <View className="gap-2">
-                <Label>Height (cm)</Label>
+                <Label>{unitSystem === 'imperial' ? 'Height (in)' : 'Height (cm)'}</Label>
                 <Input
                   value={heightCm}
                   onChangeText={setHeightCm}
                   keyboardType="decimal-pad"
-                  placeholder="e.g. 178"
+                  placeholder={unitSystem === 'imperial' ? 'e.g. 70' : 'e.g. 178'}
                 />
               </View>
 
               <View className="gap-2">
-                <Label>Weight (kg)</Label>
+                <Label>{unitSystem === 'imperial' ? 'Weight (lb)' : 'Weight (kg)'}</Label>
                 <Input
                   value={weightKg}
                   onChangeText={setWeightKg}
                   keyboardType="decimal-pad"
-                  placeholder="e.g. 82.5"
+                  placeholder={unitSystem === 'imperial' ? 'e.g. 180' : 'e.g. 82.5'}
                 />
               </View>
 
@@ -220,7 +242,8 @@ export default function OnboardingScreen() {
 
 function validateStep(
   step: number,
-  values: { age: string; heightCm: string; weightKg: string; bodyFat: string }
+  values: { age: string; heightInput: string; weightInput: string; bodyFat: string },
+  unitSystem: UnitSystem
 ): string | null {
   if (step === 0) {
     const age = toNumber(values.age);
@@ -228,10 +251,16 @@ function validateStep(
     return null;
   }
   if (step === 1) {
-    const heightCm = toNumber(values.heightCm);
-    if (!heightCm || heightCm < 90 || heightCm > 260) return 'Please enter a valid height.';
-    const weightKg = toNumber(values.weightKg);
-    if (!weightKg || weightKg < 25 || weightKg > 350) return 'Please enter a valid weight.';
+    const heightN = toNumber(values.heightInput);
+    if (heightN == null || heightN <= 0) return 'Please enter a valid height.';
+    const heightCm = unitSystem === 'imperial' ? inchesToCm(heightN) : heightN;
+    if (heightCm < 90 || heightCm > 260) return 'Please enter a valid height.';
+
+    const weightN = toNumber(values.weightInput);
+    if (weightN == null || weightN <= 0) return 'Please enter a valid weight.';
+    const weightKg = unitSystem === 'imperial' ? lbsToKg(weightN) : weightN;
+    if (weightKg < 25 || weightKg > 350) return 'Please enter a valid weight.';
+
     const bf = toNumber(values.bodyFat);
     if (bf == null || bf < 3 || bf > 70) return 'Please enter a valid body fat %.';
     return null;
@@ -239,19 +268,22 @@ function validateStep(
   return null;
 }
 
-function parseAll(values: { age: string; heightCm: string; weightKg: string; bodyFat: string }):
+function parseAll(values: { age: string; heightInput: string; weightInput: string; bodyFat: string }, unitSystem: UnitSystem):
   | {
       ok: true;
       values: { age: number; heightCm: number; weightKg: number; bodyFatPercentage: number };
     }
   | { ok: false; error: string } {
   const age = toNumber(values.age);
-  const heightCm = toNumber(values.heightCm);
-  const weightKg = toNumber(values.weightKg);
+  const heightN = toNumber(values.heightInput);
+  const weightN = toNumber(values.weightInput);
   const bodyFatPercentage = toNumber(values.bodyFat);
-  if (!age || !heightCm || !weightKg || bodyFatPercentage == null) {
+  if (!age || heightN == null || weightN == null || bodyFatPercentage == null) {
     return { ok: false, error: 'Please complete all fields.' };
   }
+
+  const heightCm = unitSystem === 'imperial' ? inchesToCm(heightN) : heightN;
+  const weightKg = unitSystem === 'imperial' ? lbsToKg(weightN) : weightN;
   return { ok: true, values: { age, heightCm, weightKg, bodyFatPercentage } };
 }
 
