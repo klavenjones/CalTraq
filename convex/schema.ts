@@ -2,6 +2,15 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
 export default defineSchema({
+  users: defineTable({
+    userId: v.string(),
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
+    pictureUrl: v.optional(v.string()),
+    createdAt: v.number(),
+    lastSeenAt: v.number(),
+  }).index('by_userId', ['userId']),
+
   profiles: defineTable({
     userId: v.string(),
     age: v.number(),
@@ -32,4 +41,3 @@ export default defineSchema({
     .index('by_userId', ['userId'])
     .index('by_userId_and_date', ['userId', 'date']),
 });
-

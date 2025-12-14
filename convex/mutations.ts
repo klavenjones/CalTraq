@@ -3,6 +3,58 @@ import { mutation } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 import { requireUserId } from './utils';
 
+export const ensureUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error('Unauthorized');
+
+    const userId = identity.subject;
+    const now = Date.now();
+
+    const existing = await ctx.db
+      .query('users')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .unique();
+
+    const email =
+      (identity.email as string | undefined) ??
+      (identity.emailAddress as string | undefined) ??
+      (identity.tokenIdentifier as string | undefined);
+
+    const name =
+      (identity.name as string | undefined) ??
+      (identity.givenName && identity.familyName
+        ? `${identity.givenName} ${identity.familyName}`
+        : undefined) ??
+      (identity.nickname as string | undefined);
+
+    const pictureUrl =
+      (identity.pictureUrl as string | undefined) ??
+      (identity.picture as string | undefined) ??
+      (identity.imageUrl as string | undefined);
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        email: email ?? existing.email,
+        name: name ?? existing.name,
+        pictureUrl: pictureUrl ?? existing.pictureUrl,
+        lastSeenAt: now,
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert('users', {
+      userId,
+      email,
+      name,
+      pictureUrl,
+      createdAt: now,
+      lastSeenAt: now,
+    });
+  },
+});
+
 export const createProfile = mutation({
   args: {
     age: v.number(),
