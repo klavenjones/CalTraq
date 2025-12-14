@@ -13,6 +13,17 @@ export const getProfile = query({
   },
 });
 
+export const getUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    return await ctx.db
+      .query('users')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .unique();
+  },
+});
+
 export const getTodayLog = query({
   args: { date: v.string() },
   handler: async (ctx, { date }) => {

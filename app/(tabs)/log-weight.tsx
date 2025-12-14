@@ -2,17 +2,22 @@ import { WeightLogForm } from '@/components/weight-log-form';
 import { Text } from '@/components/ui/text';
 import { api } from '@/convex/_generated/api';
 import { todayYyyyMmDd } from '@/lib/date';
+import type { UnitSystem } from '@/lib/units';
+import { formatWeightDisplay } from '@/lib/units';
 import { useMutation, useQuery } from 'convex/react';
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 
 export default function LogWeightScreen() {
   const today = todayYyyyMmDd();
+  const user = useQuery(api.queries.getUser, {});
   const todayLog = useQuery(api.queries.getTodayLog, { date: today });
   const logWeight = useMutation(api.mutations.logWeight);
   const trends = useQuery(api.queries.getTrends, { endDate: today, days: 30 });
 
   const [saving, setSaving] = React.useState(false);
+
+  const unitSystem: UnitSystem = user?.unitSystem ?? 'metric';
 
   const recentWeights = (trends?.logs ?? [])
     .filter((l) => typeof l.weight === 'number')
@@ -31,6 +36,7 @@ export default function LogWeightScreen() {
       <WeightLogForm
         initialWeightKg={todayLog?.weight}
         isSubmitting={saving}
+        unitSystem={unitSystem}
         onSubmit={async ({ weightKg }) => {
           setSaving(true);
           try {
@@ -49,7 +55,7 @@ export default function LogWeightScreen() {
           recentWeights.map((w) => (
             <View key={w.date} className="flex-row justify-between">
               <Text variant="muted">{w.date}</Text>
-              <Text>{w.weight.toFixed(1)} kg</Text>
+              <Text>{formatWeightDisplay(w.weight, unitSystem)}</Text>
             </View>
           ))
         )}

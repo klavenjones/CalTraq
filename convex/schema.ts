@@ -7,6 +7,7 @@ export default defineSchema({
     email: v.optional(v.string()),
     name: v.optional(v.string()),
     pictureUrl: v.optional(v.string()),
+    unitSystem: v.union(v.literal('metric'), v.literal('imperial')),
     createdAt: v.number(),
     lastSeenAt: v.number(),
   }).index('by_userId', ['userId']),

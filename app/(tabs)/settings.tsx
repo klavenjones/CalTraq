@@ -1,4 +1,5 @@
 import { ProfileForm } from '@/components/profile-form';
+import { UnitSystemSelector } from '@/components/unit-system-selector';
 import { Text } from '@/components/ui/text';
 import { api } from '@/convex/_generated/api';
 import {
@@ -8,14 +9,17 @@ import {
   calculateEstimatedTdee,
   calculateLeanBodyMassKg,
 } from '@/lib/calculations';
+import type { UnitSystem } from '@/lib/units';
 import { useMutation, useQuery } from 'convex/react';
 import { Link } from 'expo-router';
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 
 export default function SettingsScreen() {
+  const user = useQuery(api.queries.getUser, {});
   const profile = useQuery(api.queries.getProfile, {});
   const updateProfile = useMutation(api.mutations.updateProfile);
+  const setUnitSystem = useMutation(api.mutations.setUnitSystem);
   const [saving, setSaving] = React.useState(false);
 
   if (profile === undefined) {
@@ -48,6 +52,8 @@ export default function SettingsScreen() {
   const calorieTarget = calculateDailyCalorieTarget(tdee, profile.goal);
   const proteinTarget = calculateDailyProteinTargetGrams(profile.weight);
 
+  const unitSystem: UnitSystem = user?.unitSystem ?? 'metric';
+
   return (
     <ScrollView className="flex-1" contentContainerClassName="gap-4 py-6">
       <View className="px-4">
@@ -57,10 +63,20 @@ export default function SettingsScreen() {
         <Text variant="muted">Update profile + targets</Text>
       </View>
 
+      <View className="mx-4 gap-2 rounded-xl border border-border bg-card p-4">
+        <Text className="font-medium">Units</Text>
+        <UnitSystemSelector
+          value={unitSystem}
+          disabled={user === undefined || !user}
+          onChange={(next) => void setUnitSystem({ unitSystem: next })}
+        />
+      </View>
+
       <ProfileForm
         title="Profile"
         submitLabel={saving ? 'Saving…' : 'Save changes'}
         isSubmitting={saving}
+        unitSystem={unitSystem}
         initialValues={{
           age: profile.age,
           sex: profile.sex,
